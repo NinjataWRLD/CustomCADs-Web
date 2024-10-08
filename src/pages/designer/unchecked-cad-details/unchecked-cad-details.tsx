@@ -1,27 +1,43 @@
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PatchCadStatus } from '@/requests/private/designer';
+import { useQuery } from '@tanstack/react-query';
+import { GetUncheckedCad, PatchCadStatus } from '@/requests/private/designer';
 import ErrorPage from '@/components/error-page';
 import ThreeJS from '@/components/cads/three';
-import UncheckedCadDetailsCad from './unchecked-cad-details.interface';
+import getStatusCode from '@/utils/get-status-code';
+import UncheckedCadDetailsCad, { emptyUncheckedCadDetailsCad } from './unchecked-cad-details.interface';
 
 function UncheckedCadDetails() {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const [prevId, setPrevId] = useState<number>(0);
+    const [cad, setCad] = useState<UncheckedCadDetailsCad>(emptyUncheckedCadDetailsCad);
+    const [nextId, setNextId] = useState<number>(0);
 
-    const { prevId, loadedCad, nextId, error, status } = useLoaderData() as {
-        prevId: number
-        loadedCad: UncheckedCadDetailsCad
-        nextId: number
-        error: boolean
-        status: number
-    };
-    if (error) {
+    const { data, isError, error } = useQuery({
+        queryKey: ['unchecked-cad-details', id],
+        queryFn: async () => {
+            const { data } = await GetUncheckedCad(Number(id));
+            return data;
+        }
+    });
+    if (isError) {
+        const status = getStatusCode(error);
         return <ErrorPage status={status} />
     }
+    useEffect(() => {
+        if (data) {
+            const { prevId, nextId, ...cad } = data;
+            setPrevId(prevId);
+            setCad(cad);
+            setNextId(nextId);
+        }
+    }, [data]);
 
     const handlePatch = async (status: string) => {
         try {
-            await PatchCadStatus(loadedCad.id, status);
+            await PatchCadStatus(cad.id, status);
             navigate('/designer/cads/unchecked');
         } catch (e) {
             console.error(e);
@@ -36,7 +52,7 @@ function UncheckedCadDetails() {
                         <FontAwesomeIcon icon="circle-chevron-left" className="text-5xl text-indigo-800" />
                     </button>
                     <div className="h-full basis-1/2 rounded-3xl overflow-hidden">
-                        <ThreeJS cad={loadedCad} />
+                        <ThreeJS cad={cad} />
                     </div>
                     <button onClick={() => navigate(`/designer/cads/unchecked/${nextId}`)} disabled={!nextId} className={nextId ? "" : "opacity-50"}>
                         <FontAwesomeIcon icon="circle-chevron-right" className="text-5xl text-indigo-800" />

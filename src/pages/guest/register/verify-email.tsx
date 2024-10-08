@@ -1,19 +1,46 @@
-import { useLoaderData } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { RetryVerifyEmail } from '@/requests/public/identity';
+import { useQuery } from '@tanstack/react-query';
+import { IsEmailConfirmed, RetryVerifyEmail, UserExists } from '@/requests/public/identity';
 import ErrorPage from '@/components/error-page';
+import getStatusCode from '@/utils/get-status-code';
 
 function VerifyEmailPage() {
     const { t: tPages } = useTranslation('pages');
-    const { username, isEmailConfirmed, doesUserExist } = useLoaderData() as { username: string, isEmailConfirmed: boolean, doesUserExist: boolean };
+    const { username } = useParams();
 
-    if (!doesUserExist || isEmailConfirmed) {
+    const { data: isEmailConfirmed, isError: iecIsError, error: iecError } = useQuery({
+        queryKey: ['verify-email', 'email-confirmed',  username],
+        queryFn: async () => {
+            const { data } = await IsEmailConfirmed(username ?? '');
+            return data;
+        }
+    });
+    if (iecIsError) {
+        const status = getStatusCode(iecError);
+        return <ErrorPage status={status} />
+    }
+    
+    const { data: userExists, isError: ueIsError, error: ueError } = useQuery({
+        queryKey: ['verify-email', 'user-exists', username],
+        queryFn: async () => {
+            const { data } = await UserExists(username ?? '');
+            return data;
+        }
+    });
+    if (ueIsError) {
+        const status = getStatusCode(ueError);
+        return <ErrorPage status={status} />
+    }
+    
+    if ((userExists !== undefined && !userExists) 
+        || (isEmailConfirmed !== undefined && isEmailConfirmed)) {
         return <ErrorPage status={400} />;
     }
 
     const sendVerificationEmail = async () => {
         try {
-            await RetryVerifyEmail(username);
+            await RetryVerifyEmail(username ?? '');
         } catch (e) {
             console.error(e);
         }

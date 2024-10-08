@@ -1,8 +1,5 @@
-import { AxiosError } from 'axios';
 import { RouteObject } from 'react-router-dom';
 import AuthGuard from '@/routing/auth-guard';
-import { GetCategories } from '@/requests/public/categories';
-import { GetOrder } from '@/requests/private/orders';
 import ClientHomePage from '@/pages/client/client-home/client-home';
 import UserOrdersPage from '@/pages/client/user-orders/orders';
 import OrderDetailsPage from '@/pages/client/order-details/order-details';
@@ -22,21 +19,7 @@ const clientRoutes: RouteObject = {
         },
         {
             path: '/client/orders/:status/:id',
-            element: <OrderDetailsPage />,
-            loader: async ({ params }) => {
-                const { id } = params;
-                try {
-                    const categories = await GetCategories();
-                    const orderRes = await GetOrder(Number(id));
-                    return { id: Number(id), loadedCategories: categories.data, loadedOrder: orderRes.data };
-                } catch (e) {
-                    const res = { error: true };
-                    if (!(e instanceof AxiosError)) {
-                        return res;
-                    }
-                    return { ...res, status: e.response!.status };;
-                }
-            }
+            element: <OrderDetailsPage />
         },
         {
             path: '/client/orders/custom',

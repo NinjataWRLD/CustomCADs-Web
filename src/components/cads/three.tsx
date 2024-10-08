@@ -24,7 +24,7 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
         model = cad;
     } else {
         const { data, isError, error } = useQuery({
-            queryKey: ['MainCad', isHomeCad],
+            queryKey: ['main-cad', isHomeCad],
             queryFn: async () => {
                 const { data } = await GetHomeCad();
                 return data;

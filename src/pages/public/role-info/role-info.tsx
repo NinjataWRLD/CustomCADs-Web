@@ -1,15 +1,17 @@
-import { useLoaderData, Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ErrorPage from '@/components/error-page';
+import capitalize from '@/utils/capitalize';
 
 function RoleInfo() {
     const { t: tPages } = useTranslation('pages');
     const { t: tCommon } = useTranslation('common');
-    const { role } = useLoaderData() as { role: string };
+    const { role } = useParams();
+    const capRole = capitalize(role);
 
     let abilities;
     let guide;
-    switch (role) {
+    switch (capRole) {
         case 'Client':
             abilities = [tPages('role.client_ability_1'), tPages('role.client_ability_2'), tPages('role.client_ability_3')];
             guide = [tPages('role.guide_1'), tPages('role.guide_2'), tPages('role.enjoy')];
@@ -33,9 +35,9 @@ function RoleInfo() {
             <h1 className="text-3xl text-indigo-900 text-center font-bold">
                 <span>{tPages('role.title')} </span>
                 <span className="text-indigo-800 font-extrabold">
-                    {tCommon(`roles.${role}`)}
+                    {tCommon(`roles.${capRole}`)}
                 </span>!
-                <span hidden={role !== 'Designer'}>
+                <span hidden={capRole !== 'Designer'}>
                     <Link to="/about" className="block text-sm">
                         {tPages('role.software')}
                     </Link>
@@ -47,7 +49,7 @@ function RoleInfo() {
                         <span className="font-bold">{tPages('role.subtitle_1')}?</span>
                         <span className="mt-4 flex flex-col gap-y-2">
                             <p className="text-xl italic">
-                                {tPages('role.abilities', { role: tCommon(`roles.${role}`) })}:
+                                {tPages('role.abilities', { role: tCommon(`roles.${capRole}`) })}:
                             </p>
                             <ul className="text-lg ps-8 list-disc">
                                 {abilities.map((ability, i) => <li key={i}>{ability}</li>)}
@@ -58,11 +60,11 @@ function RoleInfo() {
                         <span className="font-bold">{tPages('role.subtitle_2')}?</span>
                         <span className="mt-4 flex flex-col gap-y-2">
                             <p className="text-xl italic">
-                                {tPages('role.guides', { role: tCommon(`roles.${role}`) })}:
+                                {tPages('role.guides', { role: tCommon(`roles.${capRole}`) })}:
                             </p>
                             <ol className="text-lg ps-8 list-decimal">
                                 <li>
-                                    <Link to={role === 'Designer' ? 'mailto:customcadsolutions222@gmail.com' : `/register/${role}`}>{guide[0]}</Link>
+                                    <Link to={capRole === 'Designer' ? 'mailto:customcadsolutions222@gmail.com' : `/register/${capRole}`}>{guide[0]}</Link>
                                 </li>
                                 {guide.filter((_, i) => i).map((step, i) => <li key={i}>{step}</li>)}
                             </ol>

@@ -2,38 +2,54 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 import { useLoaderData } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useQuery } from '@tanstack/react-query';
+import { GetRecentCads } from '@/requests/private/cads';
 import { GetRecentOrders } from '@/requests/private/designer';
 import ErrorPage from '@/components/error-page';
 import RecentItem from '@/components/dashboard/recent-item';
 import { getCookie, setCookie } from '@/utils/cookie-manager';
+import getStatusCode from '@/utils/get-status-code';
 import DesignerHomeOrder from './designer-home.interface-order';
 import DesignerHomeCad from './designer-home.interface-cad';
 
 function DesignerHome() {
     const { t: tPages } = useTranslation('pages');
     const { t: tCommon } = useTranslation('common');
-    const [orders, setOrders] = useState<DesignerHomeOrder[]>([]);
     const [status, setStatus] = useState<string>(getCookie('designer_dashboard_orders_status') ?? 'Pending');
 
-    const { loadedCads: recentCads, error, status: statusCode } = useLoaderData() as {
-        loadedCads: DesignerHomeCad[]
-        loadedOrders: DesignerHomeOrder[]
-        error: boolean
-        status: number
-    };
-    if (error) {
-        return <ErrorPage status={statusCode} />;
-    }
-    const fetchOrders = async () => {
-        try {
-            const { data: orders } = await GetRecentOrders(status);
-            setOrders(orders);
-        } catch (e) {
-            console.error(e);
+    let orders: DesignerHomeOrder[] = [];
+    const { data: ordersData, isError: ordersIsError, error: ordersError } = useQuery({
+        queryKey: ['designer-home', 'recent-orders', status],
+        queryFn: async () => {
+            const { data } = await GetRecentOrders(status);
+            return data;
         }
-    };
+    });
+    if (ordersIsError) {
+        const status = getStatusCode(ordersError);
+        return <ErrorPage status={status} />
+    }
+    if (ordersData) {
+        orders = ordersData;
+    }
+
+    let cads: DesignerHomeCad[] = [];
+    const { data: cadsData, isError: cadsIsError, error: cadsError } = useQuery({
+        queryKey: ['designer-home', 'recent-cads'],
+        queryFn: async () => {
+            const { data } = await GetRecentCads();
+            return data;
+        }
+    });
+    if (cadsIsError) {
+        const status = getStatusCode(cadsError);
+        return <ErrorPage status={status} />
+    }
+    if (cadsData) {
+        cads = cadsData;
+    }
+    
     useEffect(() => {
-        fetchOrders();
         setCookie('designer_dashboard_orders_status', status);
     }, [status]);
 
@@ -41,7 +57,7 @@ function DesignerHome() {
         switch (status) {
             case 'Pending': setStatus('Finished'); break;
             case 'Begun': setStatus('Pending'); break;
-            case 'Finished': setStatus('Begun'); break; 
+            case 'Finished': setStatus('Begun'); break;
         }
     };
     const handleNext = () => {
@@ -78,7 +94,7 @@ function DesignerHome() {
                                 </div>
                             </div>
                         </li>
-                        {recentCads.map(cad => <li key={cad.id}>
+                        {cads.map(cad => <li key={cad.id}>
                             <RecentItem to={`/designer/cads/${cad.id}`} item={cad} date={cad.creationDate} />
                         </li>)}
                     </ol>
@@ -107,7 +123,7 @@ function DesignerHome() {
                             </div>
                         </li>
                         {orders.map(order => <li key={order.id}>
-                            <RecentItem to={`/designer/orders/pending/${order.id}`} item={order}  date={order.orderDate} />
+                            <RecentItem to={`/designer/orders/pending/${order.id}`} item={order} date={order.orderDate} />
                         </li>)}
                     </ol>
                 </div>
