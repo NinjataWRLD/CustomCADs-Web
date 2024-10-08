@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useQuery } from '@tanstack/react-query';
+import { GetCad, PutCad, PatchCad, DeleteCad } from '@/requests/private/cads';
 import Category from '@/interfaces/category';
-import { PutCad, PatchCad, DeleteCad } from '@/requests/private/cads';
 import useAuth from '@/hooks/useAuth';
+import useCategories from '@/hooks/useCategories';
 import ThreeJS from '@/components/cads/three';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import ErrorPage from '@/components/error-page';
 import ICoordinates from '@/interfaces/coordinates';
-import CadDetailsCad from './cad-details.interface';
+import getStatusCode from '@/utils/get-status-code';
+import CadDetailsCad, { emptyCadDetailsCad } from './cad-details.interface';
 
 interface SavePositionEvent {
     camCoords: ICoordinates
@@ -24,48 +27,76 @@ interface CadForm {
     price: number
     image: FileList | null
 }
+const emptyForm: CadForm = {
+    name: '',
+    description: '',
+    categoryId: 0,
+    price: 0,
+    image: null,
+}
+
 
 function EditCadPage() {
     const { userRole } = useAuth();
     const { t: tPages } = useTranslation('pages');
     const { t: tCommon } = useTranslation('common');
     const navigate = useNavigate();
+    const { id } = useParams();
 
-    const { id, loadedCategories, loadedCad, error, status } = useLoaderData() as {
-        id: number
-        loadedCategories: Category[]
-        loadedCad: CadDetailsCad
-        error: boolean
-        status: number
-    };
-    if (error) {
-        return <ErrorPage status={status} />
+    let categories: Category[] = [];
+    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
+    if (categoriesIsError) {
+        const status = getStatusCode(categoriesError);
+        return <ErrorPage status={status} />;
+    }
+    if (categoriesData) {
+        categories = categoriesData;
     }
 
-    const loadedValues: CadForm = {
-        name: loadedCad.name,
-        description: loadedCad.description,
-        categoryId: loadedCad.category.id,
-        price: loadedCad.price,
-        image: null,
+    const [cad, setCad] = useState<CadDetailsCad>(emptyCadDetailsCad);
+    const [oldCad, setOldCad] = useState<CadForm>(emptyForm);
+    const { data: cadData, isError: cadIsError, error: cadError } = useQuery({
+        queryKey: ['cad-details', id],
+        queryFn: async () => {
+            const { data } = await GetCad(Number(id));
+            return data;
+        }
+    });
+    if (cadIsError) {
+        const status = getStatusCode(cadError);
+        return <ErrorPage status={status} />;
     }
 
-    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: loadedValues });
+    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
+    useEffect(() => {
+        if (cadData) {
+            setCad(cadData);
+            setOldCad({ name: cadData.name, description: cadData.description, categoryId: cadData.category.id, price: cadData.price, image: null });
+        }
+    }, [cadData, reset]);
+
+    useEffect(() => {
+        if (JSON.stringify(oldCad) !== JSON.stringify(emptyForm)) {
+            reset(oldCad);
+        }
+    }, [oldCad]);
     const [isEditing, setIsEditing] = useState(false);
     const [isPositionChanged, setIsPositionChanged] = useState(false);
 
     useEffect(() => {
         const newVal = watch();
-        const oldVal = loadedValues;
+        const oldVal = oldCad;
 
-        const nameIsChanged = newVal.name.trim() !== oldVal.name;
-        const descriptionIsChanged = newVal.description.trim() !== oldVal.description;
-        const categoryIdIsChanged = Number(newVal.categoryId) !== oldVal.categoryId;
-        const priceIsChanged = Number(newVal.price) !== oldVal.price;
-        const imageIsChanged = newVal.image?.item(0) != oldVal.image;
+        if (newVal && oldVal) {
+            const nameIsChanged = newVal.name.trim() !== oldVal.name;
+            const descriptionIsChanged = newVal.description.trim() !== oldVal.description;
+            const categoryIdIsChanged = Number(newVal.categoryId) !== oldVal.categoryId;
+            const priceIsChanged = Number(newVal.price) !== oldVal.price;
+            const imageIsChanged = newVal.image?.item(0) != oldVal.image;
 
-        setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged || priceIsChanged || imageIsChanged);
-    }, [watch()]);
+            setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged || priceIsChanged || imageIsChanged);
+        }
+    }, [cadData, watch()]);
 
     useEffect(() => {
         const flipIsChanged = () => {
@@ -79,8 +110,8 @@ function EditCadPage() {
             const { camCoords, panCoords } = e.detail;
 
             try {
-                await PatchCad(id, 'camera', camCoords);
-                await PatchCad(id, 'pan', panCoords);
+                await PatchCad(Number(id), 'camera', camCoords);
+                await PatchCad(Number(id), 'pan', panCoords);
 
                 setIsPositionChanged(false);
                 setTimeout(sendTrackChangesEvent, 1500);
@@ -105,20 +136,20 @@ function EditCadPage() {
         };
     }, []);
 
-    const onSubmit = async (data: CadForm) => {
+    const onSubmit = async (cad: CadForm) => {
         try {
-            const dto = { 
-                name: data.name, 
-                description: data.description, 
-                categoryId: data.categoryId, 
-                price: data.price,
-                image: data.image?.item(0)
+            const dto = {
+                name: cad.name,
+                description: cad.description,
+                categoryId: cad.categoryId,
+                price: cad.price,
+                image: cad.image?.item(0)
             };
-            await PutCad(id, dto);
+            await PutCad(Number(id), dto);
 
             setIsEditing(false);
-            reset(data || {});
-            navigate('');
+            reset(cad || {});
+            setOldCad(cad);
         } catch (e) {
             console.error(e);
         }
@@ -127,7 +158,7 @@ function EditCadPage() {
     const handleDelete = async () => {
         if (confirm(tPages('cads.confirmation'))) {
             try {
-                await DeleteCad(id);
+                await DeleteCad(Number(id));
                 navigate(`/${userRole?.toLowerCase()}/cads`);
             } catch (e) {
                 console.error(e);
@@ -158,7 +189,7 @@ function EditCadPage() {
                 <div className={`flex gap-x-4 ${isEditing ? '' : ' invisible'}`}>
                     <button className={`${isEditing ? '' : 'invisible'} bg-indigo-200 text-indigo-800 font-bold py-3 px-6 rounded-lg border border-indigo-700 shadow shadow-indigo-950 hover:bg-indigo-300 active:opacity-80`}
                         type="button"
-                        onClick={() => reset(loadedValues)}
+                        onClick={() => reset(oldCad)}
                     >
                         {tPages('cads.revert_changes')}
                     </button>
@@ -172,7 +203,7 @@ function EditCadPage() {
             <div className="flex bg-indigo-300 rounded-md overflow-hidden border-4 border-indigo-700 shadow-lg shadow-indigo-400">
                 <div className="flex justify-center items-center px-8">
                     <div className="bg-indigo-200 w-80 h-80 rounded-xl">
-                        <ThreeJS cad={loadedCad} />
+                        <ThreeJS cad={cad} />
                     </div>
                 </div>
                 <div className="grow bg-indigo-500 text-indigo-50 flex flex-col">
@@ -181,7 +212,7 @@ function EditCadPage() {
                             {...register('categoryId')}
                             className="bg-indigo-200 text-indigo-700 px-3 py-3 rounded-xl font-bold focus:outline-none border-2 border-indigo-400 shadow-lg shadow-indigo-900"
                         >
-                            {loadedCategories.map(category =>
+                            {categories.map(category =>
                                 <option key={category.id} value={category.id} className="bg-indigo-50" >
                                     {tCommon(`categories.${category.name}`)}
                                 </option>)}
@@ -234,8 +265,8 @@ function EditCadPage() {
                         </div>
                         <div>
                             <span className="font-semibold">{tPages('cads.created_on')}: </span>
-                            <time dateTime={dateToMachineReadable(loadedCad.creationDate)} className="italic">
-                                {loadedCad.creationDate}
+                            <time dateTime={dateToMachineReadable(cad.creationDate)} className="italic">
+                                {cad.creationDate}
                             </time>
                         </div>
                         <button

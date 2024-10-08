@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import usePagination from '@/hooks/usePagination';
-import objectToUrl from '@/utils/object-to-url';
+import { useQuery } from '@tanstack/react-query';
 import { BeginOrder, ReportOrder, CancelOrder, GetOrdersByStatus } from '@/requests/private/designer';
 import capitalize from '@/utils/capitalize';
+import ErrorPage from '@/components/error-page';
 import SearchBar from '@/components/searchbar';
 import Pagination from '@/components/pagination';
 import Tab from '@/components/tab';
+import objectToUrl from '@/utils/object-to-url';
 import Order from '@/components/order';
+import getStatusCode from '@/utils/get-status-code';
 import OngoingOrdersOrder from './ongoing-orders.interface';
 
 function OngoingOrders() {
@@ -20,10 +23,29 @@ function OngoingOrders() {
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 12);
 
+    const { data, isError, error } = useQuery({
+        queryKey: ['ongoing-orders', search, page, limit, status],
+        queryFn: async () => {
+            const requestSearchParams = objectToUrl({ ...search, page, limit, status });
+            const { data } = await GetOrdersByStatus(status, requestSearchParams);
+            return data;
+        }
+    });
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />;
+    }
+    
     useEffect(() => {
-        fetchOrders();
+        if (data) {
+            setTotal(data.total);
+            setOrders(data.orders);
+        }
+    }, [data]);
+
+    useEffect(() => {
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }, [status, search, page]);
+    }, [search, page, limit, status]);
 
     const chooseButtons = (order: OngoingOrdersOrder) => {
         const mainBtn = "bg-indigo-700 border-2 border-indigo-500 py-3 rounded text-center text-indigo-50 hover:opacity-70 hover:border-transparent";
@@ -124,16 +146,6 @@ function OngoingOrders() {
             </div>
         </div>
     );
-    async function fetchOrders() {
-        const requestSearchParams = objectToUrl({ ...search, page, limit, status });
-        try {
-            const { data: { orders, count } } = await GetOrdersByStatus(status, requestSearchParams);
-            setOrders(orders);
-            setTotal(count);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default OngoingOrders;

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import usePagination from '@/hooks/usePagination';
-import objectToUrl from '@/utils/object-to-url';
+import { useQuery } from '@tanstack/react-query';
 import { GetCads } from '@/requests/private/cads';
+import usePagination from '@/hooks/usePagination';
+import ErrorPage from '@/components/error-page';
 import SearchBar from '@/components/searchbar';
 import Pagination from '@/components/pagination';
 import CadItem from '@/components/cads/item';
+import objectToUrl from '@/utils/object-to-url';
+import getStatusCode from '@/utils/get-status-code';
 import UserCadsCad from './cads.interface';
 
 function UserCads() {
@@ -14,6 +17,25 @@ function UserCads() {
     const [search, setSearch] = useState({ name: '', category: '', sorting: '' });
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 12);
+
+    const { data, isError, error } = useQuery({
+        queryKey: ['cads'],
+        queryFn: async () => {
+            const requestSearchParams = objectToUrl({ ...search });
+            const { data } = await GetCads(requestSearchParams);
+            return data;
+        }
+    });
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />
+    }
+    useEffect(() => {
+        if (data) {
+            setCads(data.cads);
+            setTotal(data.count);
+        }
+    }, [data]);
 
     useEffect(() => {
         fetchCads();

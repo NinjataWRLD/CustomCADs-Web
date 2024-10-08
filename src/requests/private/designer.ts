@@ -25,19 +25,19 @@ const GetUncheckedCad = async (id: number) => {
 };
 
 const BeginOrder = async (id: number) => {
-    return await axios.patch(`/API/Designer/Orders/${id}?status=Begin`, {});
+    return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Begin' });
 };
 
 const ReportOrder = async (id: number) => {
-    return await axios.patch(`/API/Designer/Orders/${id}?status=Report`, {});
+    return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Report' });
 };
 
 const CancelOrder = async (id: number) => {
-    return await axios.patch(`/API/Designer/Orders/${id}?status=Cancel`, {});
+    return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Cancel' });
 };
 
 const FinishOrder = async (id: number, cadId: string) => {
-    return await axios.patch(`/API/Designer/Orders/${id}/Finish?cadId=${cadId}`, {});
+    return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Finsih', cadId: cadId });
 };
 
 export { GetCadsByStatus, PatchCadStatus, GetOrdersByStatus, GetOngoingOrder, GetRecentOrders, GetUncheckedCad, BeginOrder, ReportOrder, CancelOrder, FinishOrder };

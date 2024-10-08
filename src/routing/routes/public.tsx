@@ -28,11 +28,7 @@ const publicRoutes: RouteObject = {
         },
         {
             path: '/info/:role',
-            element: <RoleInfoPage />,
-            loader: async ({ params }) => {
-                const { role } = params;
-                return { role: capitalize(role ?? '') };
-            }
+            element: <RoleInfoPage />
         }
     ]
 };

@@ -1,61 +1,91 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate, useLoaderData } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { GetOrder, PutOrder } from '@/requests/private/orders';
 import Category from '@/interfaces/category';
-import { PutOrder } from '@/requests/private/orders';
-import { dateToMachineReadable } from '@/utils/date-manager';
+import useCategories from '@/hooks/useCategories';
 import ErrorPage from '@/components/error-page';
-import OrderDetailsOrder from './order-details.interface';
+import { dateToMachineReadable } from '@/utils/date-manager';
+import getStatusCode from '@/utils/get-status-code';
+import OrderDetailsOrder, { emptyOrderDetailsOrder } from './order-details.interface';
+
+interface OrderForm {
+    name: string,
+    description: string,
+    categoryId: number
+}
+const emptyForm: OrderForm = {
+    name: '',
+    description: '',
+    categoryId: 0,
+}
 
 function OrderDetails() {
     const { t: tPages } = useTranslation('pages');
     const { t: tCommon } = useTranslation('common');
-    const navigate = useNavigate();
 
-    const { id, loadedCategories, loadedOrder, error, status } = useLoaderData() as {
-        id: number,
-        loadedCategories: Category[],
-        loadedOrder: OrderDetailsOrder,
-        error: boolean,
-        status: number,
-    };
-    if (error) {
+    const { id } = useParams();
+    const [order, setOrder] = useState<OrderDetailsOrder>(emptyOrderDetailsOrder);
+    const [oldOrder, setOldOlder] = useState<OrderForm>(emptyForm);
+
+    let categories: Category[] = [];
+    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
+    if (categoriesIsError) {
+        const status = getStatusCode(categoriesError);
+        return <ErrorPage status={status} />
+    }
+    if (categoriesData) {
+        categories = categoriesData;
+    }
+
+    const { data: orderData, isError: orderIsError, error: orderError } = useQuery({
+        queryKey: ['order-details', id],
+        queryFn: async () => {
+            const { data } = await GetOrder(Number(id));
+            return data;
+        }
+    });
+    if (orderIsError) {
+        const status = getStatusCode(orderError);
         return <ErrorPage status={status} />
     }
 
-    interface OrderForm {
-        name: string,
-        description: string,
-        categoryId: number
-    }
+    const { register, watch, reset, handleSubmit } = useForm<OrderForm>({ defaultValues: emptyForm });
+    useEffect(() => {
+        if (orderData) {
+            setOrder(orderData);
+            setOldOlder({ name: orderData.name, description: orderData.description, categoryId: orderData.category.id });
+        }
+    }, [orderData]);
 
-    const loadedValues: OrderForm = {
-        name: loadedOrder.name,
-        description: loadedOrder.description,
-        categoryId: loadedOrder.category.id
-    };
-
-    const { register, watch, reset, handleSubmit } = useForm<OrderForm>({ defaultValues: loadedValues });
+    useEffect(() => {
+        if (JSON.stringify(oldOrder) !== JSON.stringify(emptyForm)) {
+            reset(oldOrder);
+        }
+    }, [oldOrder, reset]);
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        const [newName, newDescription, newCategoryId] = Object.values(watch());
-        const [oldName, oldDescription, oldCategoryId] = Object.values(loadedValues);
+        const oldVal = oldOrder;
+        const newVal = watch();
 
-        const nameIsChanged = String(newName).trim() !== oldName;
-        const descriptionIsChanged = String(newDescription).trim() !== oldDescription;
-        const categoryIdIsChanged = Number(newCategoryId) !== oldCategoryId;
+        if (oldVal && newVal) {
+            const nameIsChanged = oldVal.name !== newVal.name.trim();
+            const descriptionIsChanged = oldVal.description !== newVal.description.trim();
+            const categoryIdIsChanged = oldVal.categoryId !== Number(newVal.categoryId);
 
-        setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged);
-    }, [watch()]);
+            setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged);
+        }
+    }, [orderData, watch()]);
 
     const onSubmit = async (order: OrderForm) => {
         try {
-            await PutOrder(id, order);
+            await PutOrder(Number(id), order);
             setIsEditing(false);
             reset(order);
-            navigate('');
+            setOldOlder(order);
         } catch (e) {
             console.error(e);
         }
@@ -73,7 +103,7 @@ function OrderDetails() {
                             <h1 className="text-4xl text-indigo-950 font-bold">{tPages('orders.order-details_title', { id: id })}</h1>
                             <button className={`${isEditing ? '' : 'invisible'} bg-indigo-200 text-indigo-800 font-bold py-3 px-6 rounded-lg border border-indigo-700 shadow shadow-indigo-950 hover:bg-indigo-300 active:opacity-80`}
                                 type="button"
-                                onClick={() => reset(loadedValues)}
+                                onClick={() => reset(oldOrder)}
                             >
                                 {tPages('orders.revert_changes')}
                             </button>
@@ -86,7 +116,7 @@ function OrderDetails() {
                                     <select {...register('categoryId')}
                                         className="bg-indigo-200 text-indigo-700 px-3 py-3 rounded-xl font-bold focus:outline-none border-2 border-indigo-400 shadow-lg shadow-indigo-900"
                                     >
-                                        {loadedCategories.map(category =>
+                                        {categories.map(category =>
                                             <option key={category.id} value={category.id} className="bg-indigo-50">
                                                 {tCommon(`categories.${category.name}`)}
                                             </option>)}
@@ -95,7 +125,7 @@ function OrderDetails() {
                                         className="bg-indigo-400 text-3xl text-center font-bold focus:outline-none py-2 rounded-xl border-4 border-indigo-300 shadow-xl shadow-indigo-900"
                                     />
                                     <span className="bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl italic border-4 border-indigo-300 shadow-md shadow-indigo-950">
-                                        {tCommon(`statuses.${loadedOrder.status}`)}
+                                        {tCommon(`statuses.${order.status}`)}
                                     </span>
                                 </div>
                             </header>
@@ -116,13 +146,13 @@ function OrderDetails() {
                                 <div className="text-start">
                                     <span className="font-semibold">{tPages('orders.ordered_by')} </span>
                                     <span className="underline underline-offset-4 italic">
-                                        {loadedOrder.buyerName}
+                                        {order.buyerName}
                                     </span>
                                 </div>
                                 <div className="text-end">
                                     <span className="font-semibold">{tPages('orders.ordered_on')}</span>
-                                    <time dateTime={dateToMachineReadable(loadedOrder.orderDate)} className="italic">
-                                        {loadedOrder.orderDate}
+                                    <time dateTime={dateToMachineReadable(order.orderDate)} className="italic">
+                                        {order.orderDate}
                                     </time>
                                 </div>
                             </footer>

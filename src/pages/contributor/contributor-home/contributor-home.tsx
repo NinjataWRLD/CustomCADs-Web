@@ -1,8 +1,10 @@
-import { useLoaderData } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query';
+import { GetCadsCounts, GetRecentCads } from '@/requests/private/cads';
 import RecentItem from '@/components/dashboard/recent-item';
 import CadsCount from '@/components/dashboard/count-item';
 import ErrorPage from '@/components/error-page';
+import getStatusCode from '@/utils/get-status-code';
 import ContributorHomeCad from './contributor-home.interface';
 
 function ContributorHome() {
@@ -15,14 +17,37 @@ function ContributorHome() {
         reported: number
         banned: number
     }
-    const { loadedCads: recentCads, loadedCounts: counts, error, status } = useLoaderData() as {
-        loadedCads: ContributorHomeCad[]
-        loadedCounts: CountByStatus
-        error: boolean
-        status: number
-    };
-    if (error) {
+
+    let cads: ContributorHomeCad[] = [];
+    const { data: cadsData, isError: cadsIsError, error: cadsError } = useQuery({
+        queryKey: ['contributor-home', 'cads'],
+        queryFn: async () => {
+            const { data } = await GetRecentCads();
+            return data;
+        }
+    });
+    if (cadsIsError) {
+        const status = getStatusCode(cadsError);
         return <ErrorPage status={status} />;
+    }
+    if (cadsData) {
+        cads = cadsData;
+    }
+
+    let counts: CountByStatus = { unchecked: 0, validated: 0, reported: 0, banned: 0 };
+    const { data: countsData, isError: countsIsError, error: countsError } = useQuery({
+        queryKey: ['contributor-home', 'counts'],
+        queryFn: async () => {
+            const { data } = await GetCadsCounts();
+            return data;
+        }
+    });
+    if (countsIsError) {
+        const status = getStatusCode(countsError);
+        return <ErrorPage status={status} />;
+    }
+    if (countsData) {
+        counts = countsData;
     }
 
     return (
@@ -51,7 +76,7 @@ function ContributorHome() {
                                 </div>
                             </div>
                         </li>
-                        {recentCads.map(cad => <li key={cad.id}>
+                        {cads.map(cad => <li key={cad.id}>
                             <RecentItem to={`/contributor/cads/${cad.id}`} item={cad} date={cad.creationDate} />
                         </li>)}
                     </ol>
