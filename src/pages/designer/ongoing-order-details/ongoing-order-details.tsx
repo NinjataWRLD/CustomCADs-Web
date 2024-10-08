@@ -21,15 +21,17 @@ function OngoingOrderDetails() {
             return data;
         }
     });
-    if (isError) {
-        const status = getStatusCode(error);
-        return <ErrorPage status={status} />;
-    }
+    
     useEffect(() => {
         if (data) {
             setOrder(data);
         }
     }, [data]);
+
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />;
+    }
 
     return (
         <div className="my-2">

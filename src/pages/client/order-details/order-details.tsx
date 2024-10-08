@@ -32,10 +32,6 @@ function OrderDetails() {
 
     let categories: Category[] = [];
     const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
-    if (categoriesIsError) {
-        const status = getStatusCode(categoriesError);
-        return <ErrorPage status={status} />
-    }
     if (categoriesData) {
         categories = categoriesData;
     }
@@ -47,10 +43,6 @@ function OrderDetails() {
             return data;
         }
     });
-    if (orderIsError) {
-        const status = getStatusCode(orderError);
-        return <ErrorPage status={status} />
-    }
 
     const { register, watch, reset, handleSubmit } = useForm<OrderForm>({ defaultValues: emptyForm });
     useEffect(() => {
@@ -90,6 +82,16 @@ function OrderDetails() {
             console.error(e);
         }
     };
+    
+    if (categoriesIsError) {
+        const status = getStatusCode(categoriesError);
+        return <ErrorPage status={status} />
+    }
+
+    if (orderIsError) {
+        const status = getStatusCode(orderError);
+        return <ErrorPage status={status} />
+    }
 
     return (
         <div className="my-2">

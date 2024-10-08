@@ -18,6 +18,10 @@ function UserCads() {
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 12);
 
+    useEffect(() => {
+        document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [search, page]);
+
     const { data, isError, error } = useQuery({
         queryKey: ['cads'],
         queryFn: async () => {
@@ -26,10 +30,7 @@ function UserCads() {
             return data;
         }
     });
-    if (isError) {
-        const status = getStatusCode(error);
-        return <ErrorPage status={status} />
-    }
+    
     useEffect(() => {
         if (data) {
             setCads(data.cads);
@@ -37,10 +38,10 @@ function UserCads() {
         }
     }, [data]);
 
-    useEffect(() => {
-        fetchCads();
-        document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }, [search, page]);
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />
+    }
 
     return (
         <div className="flex flex-col gap-y-8 mb-8">
@@ -65,17 +66,6 @@ function UserCads() {
             </div>
         </div>
     );
-
-    async function fetchCads() {
-        const requestSearchParams = objectToUrl({ ...search });
-        try {
-            const { data: { cads, count } } = await GetCads(requestSearchParams);
-            setCads(cads);
-            setTotal(count);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default UserCads;

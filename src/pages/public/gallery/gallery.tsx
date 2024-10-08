@@ -19,6 +19,10 @@ function GalleryPage() {
     const { page, limit, handlePageChange } = usePagination(total, 12);
     let cads: GalleryPageCad[] = [];
 
+    useEffect(() => {
+        document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [search, page]);
+
     const { data, isError, error } = useQuery({
         queryKey: ['gallery', search, page],
         queryFn: async () => {
@@ -34,10 +38,6 @@ function GalleryPage() {
         cads = data.cads;
         total = data.count;
     }
-
-    useEffect(() => {
-        document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }, [search, page]);
 
     return (
         <div className="mt-4 mb-6 flex flex-col gap-y-6">

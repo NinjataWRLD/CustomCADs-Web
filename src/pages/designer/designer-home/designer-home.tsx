@@ -17,6 +17,10 @@ function DesignerHome() {
     const { t: tCommon } = useTranslation('common');
     const [status, setStatus] = useState<string>(getCookie('designer_dashboard_orders_status') ?? 'Pending');
 
+    useEffect(() => {
+        setCookie('designer_dashboard_orders_status', status);
+    }, [status]);
+
     let orders: DesignerHomeOrder[] = [];
     const { data: ordersData, isError: ordersIsError, error: ordersError } = useQuery({
         queryKey: ['designer-home', 'recent-orders', status],
@@ -49,10 +53,6 @@ function DesignerHome() {
         cads = cadsData;
     }
     
-    useEffect(() => {
-        setCookie('designer_dashboard_orders_status', status);
-    }, [status]);
-
     const handlePrev = () => {
         switch (status) {
             case 'Pending': setStatus('Finished'); break;

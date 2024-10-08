@@ -22,10 +22,7 @@ function UncheckedCadDetails() {
             return data;
         }
     });
-    if (isError) {
-        const status = getStatusCode(error);
-        return <ErrorPage status={status} />
-    }
+
     useEffect(() => {
         if (data) {
             const { prevId, nextId, ...cad } = data;
@@ -34,6 +31,11 @@ function UncheckedCadDetails() {
             setNextId(nextId);
         }
     }, [data]);
+
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />
+    }
 
     const handlePatch = async (status: string) => {
         try {

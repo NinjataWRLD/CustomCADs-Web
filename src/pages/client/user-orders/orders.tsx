@@ -11,6 +11,8 @@ import ErrorPage from '@/components/error-page';
 import Tab from '@/components/tab';
 import Order from '@/components/order';
 import UserOrdersOrder from './orders.interface';
+import { useQuery } from '@tanstack/react-query';
+import getStatusCode from '@/utils/get-status-code';
 
 function UserOrders() {
     const { t: tPages } = useTranslation('pages');
@@ -20,22 +22,34 @@ function UserOrders() {
     const [search, setSearch] = useState({ name: '', category: '', sorting: '' });
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 3);
-    
-    const checkStatus = (check: string) => status === check;
-    if (!(checkStatus('Pending') || checkStatus('Begun') || checkStatus('Finished'))) {
-        return <ErrorPage status={404} />
-    }
+
+    const { data, isError, error, refetch } = useQuery({
+        queryKey: [],
+        queryFn: async () => {
+            const requestSearchParams = objectToUrl({ ...search, page, limit });
+            const { data } = await GetOrders(status, requestSearchParams);
+            return data;
+        }
+    });
 
     useEffect(() => {
-        fetchOrders();
+        refetch();
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [status, search, page]);
+
+    useEffect(() => {
+        if (data) {
+            const { orders, count } = data;
+            setOrders(orders);
+            setTotal(count);
+        }
+    }, [data]);
 
     const handleDelete = async (id: number) => {
         if (confirm(tPages('orders.alert_delete'))) {
             try {
                 await DeleteOrder(id);
-                fetchOrders();
+                refetch();
             } catch (e) {
                 console.error(e);
             }
@@ -74,7 +88,7 @@ function UserOrders() {
                     try {
                         const sbd: boolean = order.shouldBeDelivered;
                         await PatchOrder(order.id, !sbd);
-                        await fetchOrders();
+                        await refetch();
                     } catch (e) {
                         console.error(e);
                     }
@@ -124,6 +138,16 @@ function UserOrders() {
         return [];
     };
 
+    const checkStatus = (check: string) => status === check;
+    if (!(checkStatus('Pending') || checkStatus('Begun') || checkStatus('Finished'))) {
+        return <ErrorPage status={404} />
+    }
+
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />
+    }
+
     return (
         <div className="flex flex-wrap justify-center gap-y-12 mt-4 mb-8">
             <div className="basis-full flex flex-col">
@@ -140,8 +164,8 @@ function UserOrders() {
                 <p className="text-lg text-indigo-900 text-center font-bold">{tPages('orders.no_orders')}</p>
                 : <ul className="basis-full flex flex-wrap gap-y-8">
                     {orders.map(order => <li key={order.id}>
-                            <Order order={order} buttons={chooseButtons(order)}/>
-                        </li>)}
+                        <Order order={order} buttons={chooseButtons(order)} />
+                    </li>)}
                 </ul>}
             <div className="basis-full" hidden={!orders.length}>
                 <Pagination
@@ -153,17 +177,6 @@ function UserOrders() {
             </div>
         </div>
     );
-
-    async function fetchOrders() {
-        const requestSearchParams = objectToUrl({ ...search, page, limit });
-        try {
-            const { data: { orders, count } } = await GetOrders(status, requestSearchParams);
-            setOrders(orders);
-            setTotal(count);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default UserOrders;

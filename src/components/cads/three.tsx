@@ -20,25 +20,6 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
     const [loader, setLoader] = useState(true);
     
     let model: ThreeJSCad = emptyThreeJSCad;
-    if (cad) {
-        model = cad;
-    } else {
-        const { data, isError, error } = useQuery({
-            queryKey: ['main-cad', isHomeCad],
-            queryFn: async () => {
-                const { data } = await GetHomeCad();
-                return data;
-            },
-            enabled: isHomeCad
-        });
-        if (isError) {
-            return <ErrorPage status={getStatusCode(error)} />;
-        }
-        if (data) {
-            model = data;
-        }
-    }
-
     useEffect(() => {
         if (model.cadPath) {
             const scene = new THREE.Scene();
@@ -163,6 +144,25 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
         }
 
     }, [loader, model.id, model.cadPath]);
+
+    if (cad) {
+        model = cad;
+    } else {
+        const { data, isError, error } = useQuery({
+            queryKey: ['main-cad', isHomeCad],
+            queryFn: async () => {
+                const { data } = await GetHomeCad();
+                return data;
+            },
+            enabled: isHomeCad
+        });
+        if (isError) {
+            return <ErrorPage status={getStatusCode(error)} />;
+        }
+        if (data) {
+            model = data;
+        }
+    }
 
     return !isHomeCad && loader
         ? <>

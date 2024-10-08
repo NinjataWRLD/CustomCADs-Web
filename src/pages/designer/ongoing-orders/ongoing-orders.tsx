@@ -31,10 +31,6 @@ function OngoingOrders() {
             return data;
         }
     });
-    if (isError) {
-        const status = getStatusCode(error);
-        return <ErrorPage status={status} />;
-    }
     
     useEffect(() => {
         if (data) {
@@ -47,6 +43,11 @@ function OngoingOrders() {
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [search, page, limit, status]);
 
+    if (isError) {
+        const status = getStatusCode(error);
+        return <ErrorPage status={status} />;
+    }
+    
     const chooseButtons = (order: OngoingOrdersOrder) => {
         const mainBtn = "bg-indigo-700 border-2 border-indigo-500 py-3 rounded text-center text-indigo-50 hover:opacity-70 hover:border-transparent";
         const sideBtn = "bg-indigo-50 border-2 border-indigo-600 py-3 rounded text-center text-indigo-950 hover:bg-rose-500 hover:border-transparent hover:text-indigo-50";

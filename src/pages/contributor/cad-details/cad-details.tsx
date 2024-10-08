@@ -43,12 +43,10 @@ function EditCadPage() {
     const navigate = useNavigate();
     const { id } = useParams();
 
+    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
+
     let categories: Category[] = [];
     const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
-    if (categoriesIsError) {
-        const status = getStatusCode(categoriesError);
-        return <ErrorPage status={status} />;
-    }
     if (categoriesData) {
         categories = categoriesData;
     }
@@ -62,12 +60,7 @@ function EditCadPage() {
             return data;
         }
     });
-    if (cadIsError) {
-        const status = getStatusCode(cadError);
-        return <ErrorPage status={status} />;
-    }
 
-    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
     useEffect(() => {
         if (cadData) {
             setCad(cadData);
@@ -136,6 +129,15 @@ function EditCadPage() {
         };
     }, []);
 
+    if (categoriesIsError) {
+        const status = getStatusCode(categoriesError);
+        return <ErrorPage status={status} />;
+    }
+    if (cadIsError) {
+        const status = getStatusCode(cadError);
+        return <ErrorPage status={status} />;
+    }
+    
     const onSubmit = async (cad: CadForm) => {
         try {
             const dto = {
