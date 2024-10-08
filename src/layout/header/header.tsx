@@ -11,7 +11,7 @@ function Header() {
     const { isAuthenticated, userRole } = useAuth();
     
     return (
-        <header className="bg-indigo-200 border-b border-indigo-700 rounded-b-lg py-4">
+        <header className="bg-gray-900 border-b border-indigo-700 rounded-b-lg py-4">
             <ul className="flex justify-between items-center mx-5">
                 <li className="basis-1/3 flex justify-start items-center gap-x-6">
                     <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
