@@ -14,14 +14,14 @@ function Circles() {
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-100'
-                color='bg-green-500'
+                color='bg-slate-500'
                 pos1='top-[-12%]'
                 pos2='right-[-12%]'
             />
             <Circle
                 height='h-[50%]'
                 width='w-[75%]'
-                color='bg-green-500'
+                color='bg-slate-500'
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-200'

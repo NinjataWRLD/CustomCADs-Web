@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Cad from '@/components/cads/cad';
 import BtnLink from './components/btn-link';
+import Cube from './components/cube';
 
 function HomePage() {
     const { t: tPages } = useTranslation('pages');
@@ -19,9 +20,10 @@ function HomePage() {
                         <BtnLink to="/register/contributor" text={tPages('home.sell_btn')} />
                     </div>
                 </article>
-                <aside className="grow h-96">
+                <div className="grow h-96 z-50">
                     {/* <Cad isHomeCad /> */}
-                </aside>
+                    <Cube />
+                </div>
             </section>
         </>
     );
