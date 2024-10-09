@@ -11,8 +11,13 @@ interface AuthGuardProps {
 function AuthGuard({ auth, role }: AuthGuardProps) {
     const { isAuthenticated, userRole } = useAuth();
     const [response, setResponse] = useState(<Outlet />);
-    
+
     useEffect(() => {
+        if (isAuthenticated === null) {
+            setResponse(<Outlet />);
+            return;
+        }
+
         if (auth === 'guest' && isAuthenticated) {
             if (userRole) {
                 setResponse(<Navigate to={`/${userRole.toLowerCase()}`} />);
@@ -21,6 +26,7 @@ function AuthGuard({ auth, role }: AuthGuardProps) {
             if (!isAuthenticated) {
                 setResponse(<ErrorPage status={401} />);
             } else if (userRole) {
+                debugger;
                 if (role !== userRole) {
                     setResponse(<ErrorPage status={403} />);
                 } else {

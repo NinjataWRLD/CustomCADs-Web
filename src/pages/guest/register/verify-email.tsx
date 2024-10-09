@@ -1,40 +1,23 @@
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { IsEmailConfirmed, RetryVerifyEmail, UserExists } from '@/requests/public/identity';
+import { useIsEmailConfirmed, useUserExists } from '@/hooks/requests/identity';
+import { RetryVerifyEmail } from '@/requests/public/identity';
 import ErrorPage from '@/components/error-page';
 import getStatusCode from '@/utils/get-status-code';
 
 function VerifyEmailPage() {
     const { t: tPages } = useTranslation('pages');
     const { username } = useParams();
+    
+    const isEmailConfirmedQuery = useIsEmailConfirmed(username ?? '');
+    const userExistsQuery = useUserExists(username ?? '');
 
-    const { data: isEmailConfirmed, isError: iecIsError, error: iecError } = useQuery({
-        queryKey: ['verify-email', 'email-confirmed',  username],
-        queryFn: async () => {
-            const { data } = await IsEmailConfirmed(username ?? '');
-            return data;
-        }
-    });
-    if (iecIsError) {
-        const status = getStatusCode(iecError);
+    if (isEmailConfirmedQuery.isError) {
+        const status = getStatusCode(isEmailConfirmedQuery.error);
         return <ErrorPage status={status} />
     }
     
-    const { data: userExists, isError: ueIsError, error: ueError } = useQuery({
-        queryKey: ['verify-email', 'user-exists', username],
-        queryFn: async () => {
-            const { data } = await UserExists(username ?? '');
-            return data;
-        }
-    });
-    if (ueIsError) {
-        const status = getStatusCode(ueError);
-        return <ErrorPage status={status} />
-    }
-    
-    if ((userExists !== undefined && !userExists) 
-        || (isEmailConfirmed !== undefined && isEmailConfirmed)) {
+    if ((userExistsQuery.data !== undefined && !userExistsQuery.data) || isEmailConfirmedQuery.data) {
         return <ErrorPage status={400} />;
     }
 

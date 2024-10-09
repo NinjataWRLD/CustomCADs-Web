@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { GetOrder, PutOrder } from '@/requests/private/orders';
 import Category from '@/interfaces/category';
-import useCategories from '@/hooks/useCategories';
+import { useGetCategories } from '@/hooks/requests/categories';
 import ErrorPage from '@/components/error-page';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import getStatusCode from '@/utils/get-status-code';
@@ -31,7 +31,7 @@ function OrderDetails() {
     const [oldOrder, setOldOlder] = useState<OrderForm>(emptyForm);
 
     let categories: Category[] = [];
-    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
+    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useGetCategories();
     if (categoriesData) {
         categories = categoriesData;
     }
@@ -82,7 +82,7 @@ function OrderDetails() {
             console.error(e);
         }
     };
-    
+
     if (categoriesIsError) {
         const status = getStatusCode(categoriesError);
         return <ErrorPage status={status} />

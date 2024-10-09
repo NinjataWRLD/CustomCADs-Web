@@ -2,32 +2,29 @@ import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { useQuery } from '@tanstack/react-query';
-import { GetHomeCad } from '@/requests/public/home';
+import { useGetHomeCad } from '@/hooks/requests/home';
 import ErrorPage from '@/components/error-page';
 import Spinner from '@/components/spinner';
 import getStatusCode from '@/utils/get-status-code';
-import ThreeJSCad, { emptyThreeJSCad } from './three.interface';
+import ThreeJSCad from './three.interface';
 
 interface ThreeJSProps {
-    cad?: ThreeJSCad
-    isHomeCad?: boolean
+    cad: ThreeJSCad
 }
 
-function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
+function ThreeJS({ cad }: ThreeJSProps) {
     const mountRef = useRef<HTMLDivElement>(null);
     const isTouchedRef = useRef(false);
     const [loader, setLoader] = useState(true);
     
-    let model: ThreeJSCad = emptyThreeJSCad;
     useEffect(() => {
-        if (model.cadPath) {
+        if (cad.cadPath) {
             const scene = new THREE.Scene();
 
             const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.001, 1000);
-            camera.position.set(model.camCoordinates.x, model.camCoordinates.y, model.camCoordinates.z);
+            camera.position.set(cad.camCoordinates.x, cad.camCoordinates.y, cad.camCoordinates.z);
 
-            const { x, y, z } = model.camCoordinates;
+            const { x, y, z } = cad.camCoordinates;
             if (!x && !y && !z) {
                 camera.position.set(0, 0, 5);
             }
@@ -63,7 +60,7 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
             };
 
             function resetPosition() {
-                const [camCoords, panCoords] = [model.camCoordinates, model.panCoordinates];
+                const [camCoords, panCoords] = [cad.camCoordinates, cad.panCoordinates];
                 camera.position.set(camCoords.x, camCoords.y, camCoords.z);
                 controls.target.set(panCoords.x, panCoords.y, panCoords.z);
                 window.dispatchEvent(new CustomEvent('ResetsPosition'));
@@ -102,12 +99,12 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.1;
-            controls.target.set(model.panCoordinates.x, model.panCoordinates.y, model.panCoordinates.z);
+            controls.target.set(cad.panCoordinates.x, cad.panCoordinates.y, cad.panCoordinates.z);
             controls.update();
 
             const loader = new GLTFLoader();
             loader.path = import.meta.env.VITE_API_BASE_URL;
-            loader.load(model.cadPath,
+            loader.load(cad.cadPath,
                 (cad) => scene.add(cad.scene),
                 (xhr) => xhr.loaded === xhr.total && setLoader(false),
                 (e) => console.error(e)
@@ -119,10 +116,6 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
                 requestAnimationFrame(animate);
                 controls.update();
                 renderer.render(scene, camera);
-
-                if (isHomeCad && !isInteracting) {
-                    scene.rotation.y += 0.01;
-                }
             }
             animate();
 
@@ -143,28 +136,21 @@ function ThreeJS({ cad, isHomeCad }: ThreeJSProps) {
             };
         }
 
-    }, [loader, model.id, model.cadPath]);
+    }, [loader, cad.id, cad.cadPath]);
 
     if (cad) {
-        model = cad;
+        cad = cad;
     } else {
-        const { data, isError, error } = useQuery({
-            queryKey: ['main-cad', isHomeCad],
-            queryFn: async () => {
-                const { data } = await GetHomeCad();
-                return data;
-            },
-            enabled: isHomeCad
-        });
-        if (isError) {
-            return <ErrorPage status={getStatusCode(error)} />;
+        const homeCadQuery = useGetHomeCad();
+        if (homeCadQuery.isError) {
+            return <ErrorPage status={getStatusCode(homeCadQuery.error)} />;
         }
-        if (data) {
-            model = data;
+        if (homeCadQuery.data) {
+            cad = homeCadQuery.data;
         }
     }
 
-    return !isHomeCad && loader
+    return loader
         ? <>
             <div ref={mountRef} className="w-full h-full hidden" />
             <Spinner />

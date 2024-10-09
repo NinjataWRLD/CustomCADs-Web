@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { GetCad, PutCad, PatchCad, DeleteCad } from '@/requests/private/cads';
 import Category from '@/interfaces/category';
 import useAuth from '@/hooks/useAuth';
-import useCategories from '@/hooks/useCategories';
+import { useGetCategories } from '@/hooks/requests/categories';
 import ThreeJS from '@/components/cads/three';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import ErrorPage from '@/components/error-page';
@@ -46,7 +46,7 @@ function EditCadPage() {
     const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
 
     let categories: Category[] = [];
-    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
+    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useGetCategories();
     if (categoriesData) {
         categories = categoriesData;
     }
@@ -137,7 +137,7 @@ function EditCadPage() {
         const status = getStatusCode(cadError);
         return <ErrorPage status={status} />;
     }
-    
+
     const onSubmit = async (cad: CadForm) => {
         try {
             const dto = {

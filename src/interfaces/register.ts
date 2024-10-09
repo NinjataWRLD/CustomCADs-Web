@@ -1,4 +1,4 @@
-export default interface IRegister {
+export default interface Register {
     firstName: string
     lastName: string
     username: string
@@ -7,7 +7,7 @@ export default interface IRegister {
     confirmPassword: string
 }
 
-export const emptyLogin: IRegister = {
+export const emptyLogin: Register = {
     firstName: '',
     lastName: '',
     username: '',

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
+import { useGetCategories } from '@/hooks/requests/categories';
 import Category from '@/interfaces/category';
-import { GetCategories } from '@/requests/public/categories';
 import { PostOrder } from '@/requests/private/orders';
 import Input from '@/components/fields/input';
 import Select from '@/components/fields/select';
@@ -28,8 +28,11 @@ function CustomOrder() {
     const { register, formState, handleSubmit } = useForm<OrderForm>({ mode: 'onTouched' });
     const { name, description, categoryId } = orderValidations();
 
+    const categoriesQuery = useGetCategories();
     useEffect(() => {
-        fetchCategories();
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
+        }
     }, []);
 
     const onSubmit = async (data: OrderForm) => {
@@ -119,15 +122,6 @@ function CustomOrder() {
             </form>
         </div>
     );
-
-    async function fetchCategories() {
-        try {
-            const { data } = await GetCategories();
-            setCategories(data);
-        } catch (e) {
-            console.error(e);
-        }
-    };
 }
 
 export default CustomOrder;

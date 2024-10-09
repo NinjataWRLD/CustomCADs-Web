@@ -4,7 +4,7 @@ const GetCategories = async () => {
     return await axios.get('/API/Categories');
 }
 
-const GetCategoriesById = async (id: number) => {
+const GetCategoryById = async (id: number) => {
     return await axios.get(`/API/Categories/${id}`);
 }
 
@@ -20,4 +20,4 @@ const DeleteCategory = async (id: number) => {
     return await axios.delete(`/API/Categories/${id}`);
 }
 
-export { GetCategories, GetCategoriesById, CreateCategory, EditCategory };
+export { GetCategories, GetCategoryById, CreateCategory, EditCategory, DeleteCategory };

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import Category from '@/interfaces/category';
 import useAuth from '@/hooks/useAuth';
-import { GetCategories } from '@/requests/public/categories';
+import { useGetCategories } from '@/hooks/requests/categories';
 import { PostCad } from '@/requests/private/cads';
 import { FinishOrder } from '@/requests/private/designer';
 import UploadCadBtn from '@/components/fields/upload-cad-btn';
@@ -34,9 +34,12 @@ function UploadCad() {
     const { register, formState, handleSubmit } = useForm<CadForm>({ mode: 'onTouched' });
     const { name, description, categoryId, price } = cadValidations();
 
+    const categoriesQuery = useGetCategories();
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
+        }
+    });
 
     const onSubmit = async (cad: CadForm) => {
         try {
@@ -144,15 +147,6 @@ function UploadCad() {
             </form>
         </div>
     );
-
-    async function fetchCategories() {
-        try {
-            const { data } = await GetCategories();
-            setCategories(data);
-        } catch (e) {
-            console.error(e);
-        }
-    };
 }
 
 export default UploadCad;
