@@ -1,6 +1,6 @@
 {
   "name": "CustomCADs",
-  "short_name": "CCADs",
+  "short_name": "CADs",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#515151",
-  "background_color": "#c5c5c5",
+  "theme_color": "#2b2b2b",
+  "background_color": "#2b2b2b",
   "display": "standalone"
 }

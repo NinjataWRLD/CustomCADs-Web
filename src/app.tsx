@@ -10,9 +10,15 @@ import './index.css';
 function App() {
     const { isLoading } = useAuth();
     useLanguages();
+    const language = localStorage.getItem('language');
+
 
     return isLoading ? <></> : (
-        <div className="flex flex-col min-h-screen bg-indigo-50 overflow-hidden relative after-blur font-english">
+        <div className={`flex flex-col min-h-screen bg-indigo-50 overflow-hidden relative after-blur`}
+            style={{
+                fontFamily: language === "en" ? 'Space Grotesk, sans-serif' : 'bulgarian, sans-serif'
+            }}
+        >
             <Circles />
             <div className="sticky top-0 z-50">
                 <Header />
