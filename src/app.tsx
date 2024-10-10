@@ -12,7 +12,7 @@ function App() {
     useLanguages();
 
     return isLoading ? <></> : (
-        <div className="flex flex-col min-h-screen bg-indigo-50 overflow-hidden relative after-blur">
+        <div className="flex flex-col min-h-screen bg-indigo-50 overflow-hidden relative after-blur font-english">
             <Circles />
             <div className="sticky top-0 z-50">
                 <Header />

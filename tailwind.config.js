@@ -8,6 +8,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        english: ['Space Grotesk', 'sans-serif'],
+        bulgarian: ['bulgarian', 'sans-serif']
+      },
       boxShadow: {
           'cube': '0 0 0 2em orange inset, 0 0 50px 10px blue inset'
       },
@@ -21,7 +25,7 @@ export default {
         },
       },
       animation: {
-        gradient: 'gradient 6s infinite',
+        gradient: 'gradient 5s infinite',
         rotate: 'rotate 15s linear infinite',
       },
     },

@@ -1,25 +1,37 @@
-﻿import { Link } from 'react-router-dom';
+﻿import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '@/hooks/useAuth';
 import HeaderBtn from './components/header-btn';
 import LoginBtn from './components/login-btn';
 import AccountBtn from './components/account-btn';
 import LanguageBtn from './components/language-btn';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 
 function Header() {
     const { t: tLayout } = useTranslation('layout');
     const { isAuthenticated, userRole } = useAuth();
-    
+    const [showButtons, setShowButtons] = useState(false);
+
+    const toggleButtons = () => {
+        setShowButtons((prev) => !prev);
+    };
+
     return (
         <header className="bg-gray-900 border-b border-indigo-700 rounded-b-lg py-4">
             <ul className="flex justify-between items-center mx-5">
                 <li className="basis-1/3 flex justify-start items-center gap-x-6">
-                    <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
-                        <HeaderBtn icon="home" text={tLayout("header.home")} orderReversed />
-                    </Link>
-                    <Link to="/gallery" className="hover:no-underline">
-                        <HeaderBtn icon="basket-shopping" text={tLayout("header.gallery")} orderReversed />
-                    </Link>
+                    <HeaderBtn icon={faBars} text={null} onClick={toggleButtons} />
+                    {showButtons && (
+                        <>
+                            <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
+                                <HeaderBtn icon="home" text={tLayout("header.home")} orderReversed />
+                            </Link>
+                            <Link to="/gallery" className="hover:no-underline">
+                                <HeaderBtn icon="basket-shopping" text={tLayout("header.gallery")} orderReversed />
+                            </Link>
+                        </>
+                    )}
                 </li>
                 <li className="basis-1/3 flex justify-center">
                     <Link to="/about" className="w-80">

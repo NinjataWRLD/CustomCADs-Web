@@ -27,12 +27,12 @@
 
 .shadow {
     position: absolute;
-    background: hsl(120, 50%, 36%);
+    background: hsla(120, 77%, 64%, 0.628);
     width: 26em;
     height: 26em;
     transform: translateZ(-230px) rotateX(90deg) rotateZ(3deg);
-    bottom: -25em;
-    left: 9em;
+    bottom: -22em;
+    left: 6em;
     box-shadow:
         0 100px 80px 10px hsla(0, 0%, 0%, 0.6),
         40px 100px 150px 10px hsla(120, 100%, 25%, 0.5),
@@ -47,6 +47,9 @@
 .right,
 .front,
 .back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 11em;
     width: 11em;
     background: hsl(0, 0%, 0%);
@@ -54,8 +57,8 @@
     top: 0;
     bottom: 0;
     box-shadow:
-        inset 0 0 30px 5px hsla(0, 0%, 16%, 0.498),
-        0 0 50px 10px hsla(0, 0%, 0%, 0.703) inset,
+        inset 0 0 30px 5px hsla(0, 0%, 0%, 0.495),
+        0 0 50px 10px hsla(0, 1%, 22%, 0.703) inset,
         0 0 0 13em hsl(120, 100%, 58%) inset;
 }
 
@@ -88,8 +91,8 @@
 .front img,
 .left img,
 .back img {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    height: 90%;
     object-fit: cover;
     border-radius: 50%;
     border: 4px solid rgba(0, 128, 0, 0.7);
