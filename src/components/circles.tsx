@@ -14,14 +14,14 @@ function Circles() {
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-100'
-                color='bg-slate-500'
+                color='bg-green-800'
                 pos1='top-[-12%]'
                 pos2='right-[-12%]'
             />
             <Circle
                 height='h-[50%]'
                 width='w-[75%]'
-                color='bg-slate-500'
+                color='bg-green-800'
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-200'
@@ -31,7 +31,7 @@ function Circles() {
             <Circle
                 height='h-[65%]'
                 width='w-[80%]'
-                color="bg-[url('/custom-images/background.png')]"
+                color="bg-black"
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-300'
@@ -41,7 +41,7 @@ function Circles() {
             <Circle
                 height='h-[70%]'
                 width='w-[65%]'
-                color="bg-[url('/custom-images/background.png')]"
+                color="bg-black"
                 round='rounded-[3rem]'
                 animation='animate-gradient'
                 delay='delay-400'
