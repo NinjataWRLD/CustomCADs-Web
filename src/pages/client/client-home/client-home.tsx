@@ -1,54 +1,55 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query';
-import { GetRecentOrders, GetOrdersCounts } from '@/requests/private/orders';
+import { useGetRecentOrders, useGetOrdersCounts } from '@/hooks/requests/orders';
 import RecentItem from '@/components/dashboard/recent-item';
 import OrdersCount from '@/components/dashboard/count-item';
 import ErrorPage from '@/components/error-page';
 import getStatusCode from '@/utils/get-status-code';
 import ClientHomeOrder from './client-home.interface';
 
+interface CountByStatus {
+    pending: number
+    begun: number
+    finished: number
+    reported: number
+    removed: number
+}
+const emptyCountByStatus: CountByStatus = {
+    pending: 0, 
+    begun: 0, 
+    finished: 0, 
+    reported: 0, 
+    removed: 0,
+};
+
 function ClientHome() {
     const { t: tCommon } = useTranslation('common');
     const { t: tPages } = useTranslation('pages');
 
-    interface CountByStatus {
-        pending: number
-        begun: number
-        finished: number
-        reported: number
-        removed: number
-    }
-
-    let orders: ClientHomeOrder[] = [];
-    const { data: recentData, isError: recentIsError, error: recentError } = useQuery({
-        queryKey: ['client-home', 'recent-orders'],
-        queryFn: async () => {
-            const { data } = await GetRecentOrders();
-            return data;
+    const [orders, setOrders] = useState<ClientHomeOrder[]>([]);
+    const recentOrdersQuery = useGetRecentOrders();
+    useEffect(() => {
+        if (recentOrdersQuery.data) {
+            setOrders(recentOrdersQuery.data);
         }
-    });
-    if (recentIsError) {
-        const status = getStatusCode(recentError);
+    }, [recentOrdersQuery.data]);
+
+    const [counts, setCounts] = useState<CountByStatus>(emptyCountByStatus);
+    const countsQuery = useGetOrdersCounts();
+    useEffect(() => {
+        if (countsQuery.data) {
+            setCounts(countsQuery.data);
+        }
+    }, [countsQuery.data]);
+
+    if (recentOrdersQuery.isError) {
+        const status = getStatusCode(recentOrdersQuery.error);
         return <ErrorPage status={status} />
     }
-    if (recentData) {
-        orders = recentData;
-    }
-
-    let counts: CountByStatus = { pending: 0, begun: 0, finished: 0, reported: 0, removed: 0 };
-    const { data: countsData, isError: countsIsError, error: countsError } = useQuery({
-        queryKey: ['client-home', 'counts'],
-        queryFn: async () => {
-            const { data } = await GetOrdersCounts();
-            return data;
-        }
-    });
-    if (countsIsError) {
-        const status = getStatusCode(countsError);
+    if (countsQuery.isError) {
+        const status = getStatusCode(countsQuery.error);
         return <ErrorPage status={status} />
-    }
-    if (countsData) {
-        counts = countsData;
     }
 
     return (

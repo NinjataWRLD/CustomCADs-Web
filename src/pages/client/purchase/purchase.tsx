@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { GetPublicKey } from '@/requests/private/payment';
-import { OrderExisting } from '@/requests/private/orders';
+import { useOrderExisting } from '@/hooks/requests/orders';
+import { useGetPublicKey } from '@/hooks/requests/payment';
+import ErrorPage from '@/components/error-page';
 import Spinner from '@/components/spinner';
+import getStatusCode from '@/utils/get-status-code';
 import CheckoutForm from './components/checkout';
 
 function PurchasePage() {
@@ -14,9 +16,13 @@ function PurchasePage() {
     const [pk, setPk] = useState();
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null>>();
 
+    const publicKeyQuery = useGetPublicKey();
+
     useEffect(() => {
-        fetchPublicKey();
-    }, []);
+        if (publicKeyQuery.data) {
+            setPk(publicKeyQuery.data);
+        }
+    }, [publicKeyQuery.data]);
 
     useEffect(() => {
         if (pk) {
@@ -24,13 +30,19 @@ function PurchasePage() {
         }
     }, [pk]);
 
+    const orderExistingMutation = useOrderExisting();
     const handlePurchase = async () => {
         try {
-            await OrderExisting(Number(id));
+            await orderExistingMutation.mutateAsync({ id: Number(id) });
         } catch (e) {
             console.error(e);
         }
     };
+
+    if (publicKeyQuery.isError) {
+        const status = getStatusCode(publicKeyQuery.error);
+        return <ErrorPage status={status} />;
+    }
 
     return (
         <>
@@ -49,15 +61,6 @@ function PurchasePage() {
                 </div>}
         </>
     );
-
-    async function fetchPublicKey() {
-        try {
-            const { data } = await GetPublicKey();
-            setPk(data);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default PurchasePage;

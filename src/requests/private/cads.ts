@@ -1,4 +1,4 @@
-import ICoordinates from '@/interfaces/coordinates';
+import Coordinates from '@/interfaces/coordinates';
 import axios from '../axios';
 
 const GetCads = async (searchParams: string) => {
@@ -25,7 +25,7 @@ const PutCad = async (id: number, cad: {}) => {
     return await axios.put(`/API/Cads/${id}`, cad, { headers: { 'Content-Type': 'multipart/form-data' } });
 }
 
-const PatchCad = async (id: number, type: string, coords: ICoordinates) => {
+const PatchCad = async (id: number, type: string, coords: Coordinates) => {
     return await axios.patch(`/API/Cads/${id}`, { type: type, coordinates: coords });
 }
 

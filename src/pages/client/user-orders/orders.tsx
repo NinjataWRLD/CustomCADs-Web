@@ -4,15 +4,15 @@ import { useTranslation } from 'react-i18next';
 import usePagination from '@/hooks/usePagination';
 import objectToUrl from '@/utils/object-to-url';
 import capitalize from '@/utils/capitalize';
-import { GetOrders, PatchOrder, DownloadOrderCad, DeleteOrder } from '@/requests/private/orders';
+import { PatchOrder, DownloadOrderCad, DeleteOrder } from '@/requests/private/orders';
+import { useGetOrders } from '@/hooks/requests/orders';
 import SearchBar from '@/components/searchbar';
 import Pagination from '@/components/pagination';
 import ErrorPage from '@/components/error-page';
 import Tab from '@/components/tab';
 import Order from '@/components/order';
-import UserOrdersOrder from './orders.interface';
-import { useQuery } from '@tanstack/react-query';
 import getStatusCode from '@/utils/get-status-code';
+import UserOrdersOrder from './orders.interface';
 
 function UserOrders() {
     const { t: tPages } = useTranslation('pages');
@@ -23,33 +23,27 @@ function UserOrders() {
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 3);
 
-    const { data, isError, error, refetch } = useQuery({
-        queryKey: [],
-        queryFn: async () => {
-            const requestSearchParams = objectToUrl({ ...search, page, limit });
-            const { data } = await GetOrders(status, requestSearchParams);
-            return data;
-        }
-    });
+    const requestSearchParams = objectToUrl({ ...search, page, limit });
+    const orderQuery = useGetOrders(status, requestSearchParams);
 
     useEffect(() => {
-        refetch();
+        orderQuery.refetch();
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [status, search, page]);
 
     useEffect(() => {
-        if (data) {
-            const { orders, count } = data;
+        if (orderQuery.data) {
+            const { orders, count } = orderQuery.data;
             setOrders(orders);
             setTotal(count);
         }
-    }, [data]);
+    }, [orderQuery.data]);
 
     const handleDelete = async (id: number) => {
         if (confirm(tPages('orders.alert_delete'))) {
             try {
                 await DeleteOrder(id);
-                refetch();
+                orderQuery.refetch();
             } catch (e) {
                 console.error(e);
             }
@@ -88,7 +82,7 @@ function UserOrders() {
                     try {
                         const sbd: boolean = order.shouldBeDelivered;
                         await PatchOrder(order.id, !sbd);
-                        await refetch();
+                        await orderQuery.refetch();
                     } catch (e) {
                         console.error(e);
                     }
@@ -143,8 +137,8 @@ function UserOrders() {
         return <ErrorPage status={404} />
     }
 
-    if (isError) {
-        const status = getStatusCode(error);
+    if (orderQuery.isError) {
+        const status = getStatusCode(orderQuery.error);
         return <ErrorPage status={status} />
     }
 

@@ -36,7 +36,7 @@ const CancelOrder = async (id: number) => {
     return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Cancel' });
 };
 
-const FinishOrder = async (id: number, cadId: string) => {
+const FinishOrder = async (id: number, cadId: number) => {
     return await axios.patch(`/API/Designer/Orders/${id}`, { action: 'Finsih', cadId: cadId });
 };
 

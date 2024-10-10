@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { GetOngoingOrder } from '@/requests/private/designer';
+import { useGetOngoingOrder } from '@/hooks/requests/designer';
 import ErrorPage from '@/components/error-page';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import getStatusCode from '@/utils/get-status-code';
@@ -14,22 +13,15 @@ function OngoingOrderDetails() {
     const { id } = useParams();
     const [order, setOrder] = useState<OngoingOrderDetailsOrder>(emptyOngoingOrderDetailsOrder);
 
-    const { data, isError, error } = useQuery({
-        queryKey: ['ongoing-orders-details', id],
-        queryFn: async () => {
-            const { data } = await GetOngoingOrder(Number(id));
-            return data;
-        }
-    });
-    
+    const ongoingOrdersQuery = useGetOngoingOrder(Number(id));
     useEffect(() => {
-        if (data) {
-            setOrder(data);
+        if (ongoingOrdersQuery.data) {
+            setOrder(ongoingOrdersQuery.data);
         }
-    }, [data]);
+    }, [ongoingOrdersQuery.data]);
 
-    if (isError) {
-        const status = getStatusCode(error);
+    if (ongoingOrdersQuery.isError) {
+        const status = getStatusCode(ongoingOrdersQuery.error);
         return <ErrorPage status={status} />;
     }
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useQuery } from '@tanstack/react-query';
-import { GetUncheckedCad, PatchCadStatus } from '@/requests/private/designer';
+import { useGetUncheckedCad } from '@/hooks/requests/designer';
+import { PatchCadStatus } from '@/requests/private/designer';
 import ErrorPage from '@/components/error-page';
 import ThreeJS from '@/components/cads/three';
 import getStatusCode from '@/utils/get-status-code';
@@ -15,25 +15,18 @@ function UncheckedCadDetails() {
     const [cad, setCad] = useState<UncheckedCadDetailsCad>(emptyUncheckedCadDetailsCad);
     const [nextId, setNextId] = useState<number>(0);
 
-    const { data, isError, error } = useQuery({
-        queryKey: ['unchecked-cad-details', id],
-        queryFn: async () => {
-            const { data } = await GetUncheckedCad(Number(id));
-            return data;
-        }
-    });
-
+    const uncheckedCadQuery = useGetUncheckedCad(Number(id));
     useEffect(() => {
-        if (data) {
-            const { prevId, nextId, ...cad } = data;
+        if (uncheckedCadQuery.data) {
+            const { prevId, nextId, ...cad } = uncheckedCadQuery.data;
             setPrevId(prevId);
             setCad(cad);
             setNextId(nextId);
         }
-    }, [data]);
+    }, [uncheckedCadQuery.data]);
 
-    if (isError) {
-        const status = getStatusCode(error);
+    if (uncheckedCadQuery.isError) {
+        const status = getStatusCode(uncheckedCadQuery.error);
         return <ErrorPage status={status} />
     }
 

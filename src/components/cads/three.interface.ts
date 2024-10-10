@@ -1,10 +1,10 @@
-import ICoordinates, { emptyCoordinates } from "@/interfaces/coordinates"
+import Coordinates, { emptyCoordinates } from "@/interfaces/coordinates"
 
 export default interface ThreeJSCad {
     id: number
     cadPath: string
-    camCoordinates: ICoordinates
-    panCoordinates: ICoordinates
+    camCoordinates: Coordinates
+    panCoordinates: Coordinates
 }
 
 export const emptyThreeJSCad: ThreeJSCad = {

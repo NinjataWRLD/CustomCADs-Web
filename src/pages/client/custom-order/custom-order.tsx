@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useGetCategories } from '@/hooks/requests/categories';
+import { usePostOrder } from '@/hooks/requests/orders';
 import Category from '@/interfaces/category';
-import { PostOrder } from '@/requests/private/orders';
 import Input from '@/components/fields/input';
 import Select from '@/components/fields/select';
 import TextArea from '@/components/fields/textarea';
@@ -35,10 +35,11 @@ function CustomOrder() {
         }
     }, []);
 
+    const postOrderMutation = usePostOrder();
     const onSubmit = async (data: OrderForm) => {
         try {
             const order = { ...data, image };
-            await PostOrder(order);
+            await postOrderMutation.mutateAsync({ order: order });
             navigate("/client/orders/pending");
         } catch (e) {
             console.error(e);

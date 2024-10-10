@@ -1,5 +1,5 @@
 import Category, { emptyCategory } from "@/interfaces/category"
-import ICoordinates, { emptyCoordinates } from "@/interfaces/coordinates"
+import Coordinates, { emptyCoordinates } from "@/interfaces/coordinates"
 
 export default interface GalleryDetailsCad {
     id: number
@@ -7,8 +7,8 @@ export default interface GalleryDetailsCad {
     description: string
     price: number
     cadPath: string
-    camCoordinates: ICoordinates
-    panCoordinates: ICoordinates
+    camCoordinates: Coordinates
+    panCoordinates: Coordinates
     creatorName: string
     creationDate: string
     category: Category

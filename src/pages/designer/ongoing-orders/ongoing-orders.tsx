@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import usePagination from '@/hooks/usePagination';
 import { useQuery } from '@tanstack/react-query';
-import { BeginOrder, ReportOrder, CancelOrder, GetOrdersByStatus } from '@/requests/private/designer';
+import { useGetOrdersByStatus } from '@/hooks/requests/designer';
+import { BeginOrder, ReportOrder, CancelOrder } from '@/requests/private/designer';
 import capitalize from '@/utils/capitalize';
 import ErrorPage from '@/components/error-page';
 import SearchBar from '@/components/searchbar';
@@ -23,28 +24,22 @@ function OngoingOrders() {
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 12);
 
-    const { data, isError, error } = useQuery({
-        queryKey: ['ongoing-orders', search, page, limit, status],
-        queryFn: async () => {
-            const requestSearchParams = objectToUrl({ ...search, page, limit, status });
-            const { data } = await GetOrdersByStatus(status, requestSearchParams);
-            return data;
-        }
-    });
-    
+    const requestSearchParams = objectToUrl({ ...search, page, limit, status });
+    const ordersQuery = useGetOrdersByStatus(status, requestSearchParams);    
     useEffect(() => {
-        if (data) {
-            setTotal(data.total);
-            setOrders(data.orders);
+        if (ordersQuery.data) {
+            const { total, orders } = ordersQuery.data;
+            setTotal(total);
+            setOrders(orders);
         }
-    }, [data]);
+    }, [ordersQuery.data]);
 
     useEffect(() => {
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [search, page, limit, status]);
 
-    if (isError) {
-        const status = getStatusCode(error);
+    if (ordersQuery.isError) {
+        const status = getStatusCode(ordersQuery.error);
         return <ErrorPage status={status} />;
     }
     
