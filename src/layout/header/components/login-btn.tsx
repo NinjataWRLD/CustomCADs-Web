@@ -6,7 +6,7 @@ function LoginBtn() {
     const { t: tLayout } = useTranslation('layout');
 
     return (
-        <Link to="/login">
+        <Link to="/login" className='hover:no-underline'>
             <HeaderBtn icon="user-secret" text={tLayout("header.login")} />
         </Link>
     )
