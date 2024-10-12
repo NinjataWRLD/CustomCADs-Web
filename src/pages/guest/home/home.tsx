@@ -15,7 +15,7 @@ function HomePage() {
                         <span className="text-2xl text-white">{tPages('home.subtitle')}</span>
                         <span className="text-lg italic text-white">{tPages('home.hint')}</span>
                     </span>
-                    <div className="basis-full flex justify-center gap-x-5">
+                    <div className="basis-full flex justify-center gap-x-10">
                         <BtnLink to="/register/client" text={tPages('home.buy_btn')} />
                         <BtnLink to="/register/contributor" text={tPages('home.sell_btn')} />
                     </div>

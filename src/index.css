@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'bulgarian';
-    src: url('../public/fonts/zantroke.otf') format('opentype');
+    src: url('../fonts/zantroke.otf') format('opentype');
     font-weight: 900;
     font-style: normal;
   }

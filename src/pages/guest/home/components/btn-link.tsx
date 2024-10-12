@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import styles from './btn-link.module.css'
 
 interface BtnLinkProps {
     to: string
@@ -7,10 +8,9 @@ interface BtnLinkProps {
 
 function BtnLink({ to, text }: BtnLinkProps) {
     return (
-        <Link to={to} className="bg-indigo-500 rounded-md py-3 px-12 hover:opacity-80 active:bg-indigo-800">
-            <button>
-                <span className="text-lg text-indigo-50 font-kanit font-bold">{text}</span>
-            </button>
+        <Link to={to} className={`${styles.link}`}>
+                <div className={`${styles.button}`}>{text}</div>
+                <div className={`${styles["button-gradient"]}`}></div>
         </Link>
     );
 }

@@ -11,10 +11,10 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
 function Header() {
     const { t: tLayout } = useTranslation('layout');
     const { isAuthenticated, userRole } = useAuth();
-    const [showButtons, setShowButtons] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(false);
 
     const toggleButtons = () => {
-        setShowButtons((prev) => !prev);
+        setShowSidebar((prev) => !prev);
     };
 
     return (
@@ -22,7 +22,7 @@ function Header() {
             <ul className="flex justify-between items-center mx-5">
                 <li className="basis-1/3 flex justify-start items-center gap-x-6">
                     <HeaderBtn icon={faBars} text={null} onClick={toggleButtons} />
-                    {showButtons && (
+                    {showSidebar && (
                         <>
                             <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
                                 <HeaderBtn icon="home" text={tLayout("header.home")} orderReversed />
@@ -40,7 +40,6 @@ function Header() {
                 </li>
                 <li className="basis-1/3 flex justify-end items-center gap-x-4">
                     {isAuthenticated ? <AccountBtn /> : <LoginBtn />}
-                    <LanguageBtn />
                 </li>
             </ul>
         </header>
