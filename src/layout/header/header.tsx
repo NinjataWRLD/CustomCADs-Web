@@ -1,37 +1,29 @@
-﻿import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 import useAuth from '@/hooks/useAuth';
 import HeaderBtn from './components/header-btn';
 import LoginBtn from './components/login-btn';
 import AccountBtn from './components/account-btn';
-import LanguageBtn from './components/language-btn';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import Sidebar from '../sidebar/sidebar';
 
-function Header() {
-    const { t: tLayout } = useTranslation('layout');
+interface HeaderProps {
+    showSidebar: boolean;
+    setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function Header({ showSidebar, setShowSidebar } : HeaderProps) {
     const { isAuthenticated, userRole } = useAuth();
-    const [showSidebar, setShowSidebar] = useState(false);
 
-    const toggleButtons = () => {
-        setShowSidebar((prev) => !prev);
+    const toggleSidebar = () => {
+        setShowSidebar(prev => !prev);
     };
 
     return (
         <header className="bg-gray-900 border-b border-indigo-700 rounded-b-lg py-4">
             <ul className="flex justify-between items-center mx-5">
                 <li className="basis-1/3 flex justify-start items-center gap-x-6">
-                    <HeaderBtn icon={faBars} text={null} onClick={toggleButtons} />
-                    {showSidebar && (
-                        <>
-                            <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
-                                <HeaderBtn icon="home" text={tLayout("header.home")} orderReversed />
-                            </Link>
-                            <Link to="/gallery" className="hover:no-underline">
-                                <HeaderBtn icon="basket-shopping" text={tLayout("header.gallery")} orderReversed />
-                            </Link>
-                        </>
-                    )}
+                    <HeaderBtn icon={faBars} text={null} onClick={toggleSidebar} />
                 </li>
                 <li className="basis-1/3 flex justify-center">
                     <Link to="/about" className="w-80">
