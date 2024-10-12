@@ -8,7 +8,7 @@ interface BtnLinkProps {
 
 function BtnLink({ to, text }: BtnLinkProps) {
     return (
-        <Link to={to} className={`${styles.link}`}>
+        <Link to={to} className='relative inline-block hover:no-underline'>
                 <div className={`${styles.button}`}>{text}</div>
                 <div className={`${styles["button-gradient"]}`}></div>
         </Link>

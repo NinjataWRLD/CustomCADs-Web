@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '@/hooks/useAuth';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
 import SidebarBtn from './components/sidebar-btn';
 import LoginBtn from './components/login-btn';
 import LanguageSelector from './components/language-btn';
@@ -17,7 +15,7 @@ function Sidebar() {
             <ul className="flex flex-col justify-center items-center mx-5">
                 <li className="basis-1/3 flex flex-col justify-center mt-16">
                     <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
-                        <SidebarBtn icon="home" orderReversed />
+                        <SidebarBtn icon="home" text={tLayout("header.home")} orderReversed />
                     </Link>
                 </li>
                 <li className="basis-1/3 flex flex-col justify-center mt-5">
