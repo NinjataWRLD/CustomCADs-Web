@@ -1,16 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { GetHomeCad, Gallery, GalleryDetails, GetSortings } from '@/requests/public/home';
 
-const useGetHomeCad = () => useQuery({
+const useGetHomeCad = (enabled?: boolean) => useQuery({
     queryKey: ['main-cad'],
     queryFn: async () => {
         const { data } = await GetHomeCad();
         return data;
-    }
+    },
+    enabled: enabled,
 });
 
 const useGallery = (searchParams: string) => useQuery({
-    queryKey: ['main-cad'],
+    queryKey: ['gallery'],
     queryFn: async () => {
         const { data } = await Gallery(searchParams);
         return data;

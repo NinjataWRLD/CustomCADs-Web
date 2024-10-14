@@ -1,18 +1,19 @@
 import { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 import { useIsAuthenticated } from '@/hooks/requests/identity';
-import ErrorPage from '@/components/error-page';
 import { getCookie } from '@/utils/cookie-manager';
-import getStatusCode from '@/utils/get-status-code';
 
 interface AuthContextValues {
     username: string | null
     userRole: string | null
     isAuthenticated: boolean | null
-    isLoading: boolean
     setIsAuthenticated: Dispatch<SetStateAction<boolean | null>>
+    is: {
+        error: boolean,
+        loading: boolean,
+    }
 }
 
-const defaultValues: AuthContextValues = { username: '', userRole: '', isAuthenticated: false, isLoading: true, setIsAuthenticated: () => { } };
+const defaultValues: AuthContextValues = { username: '', userRole: '', isAuthenticated: false, setIsAuthenticated: () => { }, is: { loading: true, error: false } };
 export const AuthContext = createContext(defaultValues);
 
 interface AuthProviderProps {
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
         }
     }, [isAuthenticatedQuery.data]);
-    
+
     useEffect(() => {
         if (isAuthenticated) {
             setUsername(getCookie('username') ?? '');
@@ -44,13 +45,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }, [isAuthenticated]);
 
-    if (isAuthenticatedQuery.isError) {
-        const status = getStatusCode(isAuthenticatedQuery.error);
-        return <ErrorPage status={status} />
-    }
-
     return (
-        <AuthContext.Provider value={{ username, userRole, isAuthenticated, setIsAuthenticated, isLoading: isAuthenticatedQuery.isLoading, }}>
+        <AuthContext.Provider value={{ username, userRole, isAuthenticated, setIsAuthenticated, is: { loading: isAuthenticatedQuery.isLoading, error: isAuthenticatedQuery.isError }, }}>
             {children}
         </AuthContext.Provider>
     );

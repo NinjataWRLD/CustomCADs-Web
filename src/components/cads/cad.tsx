@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import ThreeJS from './three.js';
 import ThreeJSCad, { emptyThreeJSCad } from './three.interface.js';
-import { GetHomeCad } from '@/requests/public/home.js';
+import { useGetHomeCad } from '@/hooks/requests/home.js';
 
 interface CadProps {
     cad?: ThreeJSCad
@@ -11,11 +11,16 @@ interface CadProps {
 function Cad({ cad, isHomeCad }: CadProps) {
     const [model, setModel] = useState<ThreeJSCad>(emptyThreeJSCad);
 
+    const homeCadQuery = useGetHomeCad(isHomeCad);
     useEffect(() => {
         if (cad) {
             setModel(cad);
         } else if (isHomeCad) {
-            fetchHomeCad();
+            if (homeCadQuery.data) {
+                setModel(homeCadQuery.data);
+            }
+        } else {
+            console.error('Cad source not provided.');
         }
     }, []);
 
@@ -24,15 +29,6 @@ function Cad({ cad, isHomeCad }: CadProps) {
             <ThreeJS cad={model} />
         </div>
     );
-
-    async function fetchHomeCad() {
-        try {
-            const { data } = await GetHomeCad();
-            setModel(data);
-        } catch (error) {
-            console.error(error);
-        }
-    }
 }
 
 export default Cad;

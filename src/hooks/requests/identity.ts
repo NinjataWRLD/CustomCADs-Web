@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Register, VerifyEmail, Login, ResetPassword, ForgotPassword, Logout, RefreshToken, IsAuthenticated, GetUserRole, IsEmailConfirmed, UserExists } from '@/requests/public/identity';
+import { Register, VerifyEmail, RetryVerifyEmail, Login, ResetPassword, ForgotPassword, Logout, RefreshToken, IsAuthenticated, GetUserRole, IsEmailConfirmed, UserExists } from '@/requests/public/identity';
 import IRegister from '@/interfaces/register';
 import ILogin from '@/interfaces/login';
 
@@ -15,6 +15,15 @@ const useVerifyEmail = ({ username, token }: VerifyEmailProps) => useQuery({
     queryKey: ['verify-email'],
     queryFn: async () => {
         const { data } = await VerifyEmail(username, token);
+        return data;
+    }
+});
+
+interface RetryVerifyEmailProps { username: string };
+const useRetryVerifyEmail = ({ username }: RetryVerifyEmailProps) => useQuery({
+    queryKey: ['retry-verify-email'],
+    queryFn: async () => {
+        const { data } = await RetryVerifyEmail(username);
         return data;
     }
 });
@@ -82,4 +91,4 @@ const useUserExists = (username: string) => useQuery({
 });
 
 
-export { useRegister, useVerifyEmail, useLogin, useResetPassword, useForgotPassword, useLogout, useRefreshToken, useIsAuthenticated, useGetUserRole, useIsEmailConfirmed, useUserExists };
+export { useRegister, useVerifyEmail, useRetryVerifyEmail, useLogin, useResetPassword, useForgotPassword, useLogout, useRefreshToken, useIsAuthenticated, useGetUserRole, useIsEmailConfirmed, useUserExists };
