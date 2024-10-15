@@ -18,7 +18,7 @@ function Navbar() {
     }
 
     return (
-        <nav className="text-indigo-900 font-bold min-h-8">
+        <nav className="text-green-400 font-bold min-h-8">
             {navs}
         </nav>
     );

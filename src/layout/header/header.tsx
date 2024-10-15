@@ -26,7 +26,7 @@ function Header({ showSidebar, setShowSidebar } : HeaderProps) {
                     <HeaderBtn icon={faBars} onClick={toggleSidebar} />
                 </li>
                 <li className="basis-1/3 flex justify-center">
-                    <Link to="/about" className="w-80 hover:no-underline">
+                    <Link to="/" className="w-80 hover:no-underline">
                         <img src="/logo.png" className="w-full h-auto hover:opacity-60 active:opacity-80" />
                     </Link>
                 </li>

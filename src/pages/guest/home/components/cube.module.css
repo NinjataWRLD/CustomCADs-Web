@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     perspective: 20em;
-    perspective-origin: 77px 70px;
+    perspective-origin: 100px 0px;
 }
 
 .cube {
@@ -15,7 +15,7 @@
     align-items: center;
     justify-content: center;
     animation: animate 15s linear infinite;
-    margin-bottom: 10em;
+    margin-bottom: 16em;
     margin-right: 3em;
 }
 
@@ -33,10 +33,6 @@
     transform: translateZ(-230px) rotateX(90deg) rotateZ(3deg);
     bottom: -22em;
     left: 6em;
-    box-shadow:
-        0 100px 80px 10px hsla(0, 0%, 0%, 0.6),
-        40px 100px 150px 10px hsla(120, 100%, 25%, 0.5),
-        -30px 50px 70px 5px hsla(0, 0%, 0%, 0.3);
     filter: blur(100px);
     z-index: -1;
 }
@@ -50,8 +46,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 11em;
-    width: 11em;
+    height: 11.2em;
+    width: 11.2em;
     background: hsl(0, 0%, 0%);
     position: absolute;
     top: 0;
@@ -62,29 +58,38 @@
         0 0 0 13em hsl(120, 100%, 58%) inset;
 }
 
-
 .front {
     transform: translateZ(5.5em);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
 }
 
 .back {
     transform: translateZ(-5.5em) rotateY(180deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
 }
 
 .top {
     transform: translateY(-5.5em) rotateX(90deg);
+    border-radius: 0.1em;
 }
 
 .bottom {
     transform: translateY(5.5em) rotateX(90deg);
+    border-radius: 1em;
 }
 
 .right {
     transform: translateX(5.5em) rotateY(90deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
 }
 
 .left {
     transform: translateX(-5.5em) rotateY(270deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
 }
 
 .right img,

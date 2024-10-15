@@ -28,6 +28,9 @@ export default {
         gradient: 'gradient 5s infinite',
         rotate: 'rotate 15s linear infinite',
       },
+      clipPath: {
+        'trapezoid': 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)',
+      }
     },
   },
   plugins: [
@@ -45,6 +48,9 @@ export default {
           width: '100%',
           backdropFilter: 'blur(200px)',
           zIndex: '1',
+        },
+        '.footer-trapezoid': {
+          clipPath: 'polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%)',
         },
       }, ['responsive', 'hover']);
     }),

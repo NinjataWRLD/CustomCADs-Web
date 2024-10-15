@@ -6,11 +6,11 @@ function ContributorNavigationalMenu() {
 
     return (
         <ul className="px-2 flex gap-x-[0.75px]">
-            <li className="basis-full text-center bg-indigo-300 rounded-b-3xl py-3 shadow-indigo-400 shadow-xl">
-                <Link to="/contributor/cads">{tLayout('navbar.cads_link_1')}</Link>
+            <li className="basis-full text-center bg-slate-800 rounded-b-[50%] py-3 shadow-green-400 shadow-xl">
+                <Link to="/contributor/cads" className='hover:no-underline hover:text-green-200'>{tLayout('navbar.cads_link_1')}</Link>
             </li>
-            <li className="basis-full text-center bg-indigo-300 rounded-b-3xl py-3 shadow-indigo-400 shadow-xl">
-                <Link to="/contributor/cads/upload">{tLayout('navbar.cads_link_2')}</Link>
+            <li className="basis-full text-center bg-slate-800 rounded-b-[50%] py-3 shadow-green-400 shadow-xl">
+                <Link to="/contributor/cads/upload" className='hover:no-underline hover:text-green-200'>{tLayout('navbar.cads_link_2')}</Link>
             </li>
         </ul>
     );
