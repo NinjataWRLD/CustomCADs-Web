@@ -55,13 +55,13 @@ function UncheckedCadDetails() {
                 </div>
                 <div className="basis-[5%] flex justify-evenly">
                     <button
-                        onClick={() => handlePatch('Validated')}
+                        onClick={() => handlePatch('Validate')}
                         className="bg-green-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-green-700 hover:opacity-80 active:bg-green-600"
                     >
                         <FontAwesomeIcon icon="check" className="text-2xl" />
                     </button>
                     <button
-                        onClick={() => handlePatch('Reported')}
+                        onClick={() => handlePatch('Report')}
                         className="bg-red-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-red-700 hover:opacity-80 active:bg-red-600"
                     >
                         <FontAwesomeIcon icon="flag" className="text-2xl" />
