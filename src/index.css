@@ -1,8 +1,6 @@
 @font-face {
     font-family: 'bulgarian';
-    src: url('../fonts/zantroke.otf') format('opentype');
-    font-weight: 900;
-    font-style: normal;
+    src: url('../public/fonts/bg-font.ttf') format('opentype');
   }
 
 button:focus, a:focus {

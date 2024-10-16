@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '@/hooks/useAuth';
+import AnimatedPage from './animated-page';
 
 interface ErrorPageParams {
     status: number | undefined
@@ -41,13 +42,15 @@ function ErrorPage({ status }: ErrorPageParams) {
     }
 
     return (
-        <div className="flex flex-wrap gap-y-4 justify-center text-indigo-800 text-center ">
-            <span className="basis-full text-2xl font-bold">{text}</span>
-            <div className="basis-5/12">
-                <img src={src} className="w-full h-auto" />
+        <AnimatedPage>
+            <div className="flex flex-wrap gap-y-4 justify-center text-indigo-800 text-center ">
+                <span className="basis-full text-2xl font-bold">{text}</span>
+                <div className="basis-5/12">
+                    <img src={src} className="w-full h-auto" />
+                </div>
+                <span className="basis-full text-lg italic hover:underline">{link}</span>
             </div>
-            <span className="basis-full text-lg italic hover:underline">{link}</span>
-        </div>
+        </AnimatedPage>
     );
 }
 
