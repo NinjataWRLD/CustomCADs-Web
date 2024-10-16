@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import useLanguages from '@/hooks/useLanguages';
 import useAuth from '@/hooks/useAuth';
 import Header from '@/layout/header/header';
@@ -16,24 +16,23 @@ function App() {
     useLanguages();
     const language = localStorage.getItem('language');
     const [showSidebar, setShowSidebar] = useState(true);
-    const location = useLocation();
-    const headerHeight = '70px';
 
     return (
         <div className={`flex flex-col min-h-screen bg-indigo-50 overflow-hidden relative after-blur font-${language === "en" ? 'english' : 'bulgarian'}`}>
             <Circles />
-            <div className={`fixed top-0 left-0 w-full z-50 mt-[${headerHeight}]`}>
+            <div className={`fixed top-0 w-full z-50`}>
                 <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
             </div>
-            <div className={`fixed flex w-full z-40 mt-[${headerHeight}]`}>
-                <aside className={`w-[5%] ${showSidebar ? '' : 'hidden'}`}>
+
+            <div className={`fixed top-[4.3rem] left-0 flex w-full z-50`}>
+                <aside className={`w-[5%] h-full ${showSidebar ? '' : 'hidden'}`}>
                     <Sidebar />
                 </aside>
                 <div className={`${showSidebar ? 'w-[95%]' : 'w-[100%]'}`}>
-                    {location.pathname === '/' && <Navbar />}
+                    <Navbar />
                 </div>
             </div>
-            <main className={`basis-full grow self-stretch my-8 mx-16 z-10 relative mt-[${headerHeight}]`}>
+            <main className={`basis-full grow self-stretch mb-8 mx-16 z-40 mt-[8rem] relative`}>
                 {
                     is.loading
                         ? <div className="self-center">

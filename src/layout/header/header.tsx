@@ -1,19 +1,17 @@
 ﻿import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import useAuth from '@/hooks/useAuth';
 import HeaderBtn from './components/header-btn';
 import LoginBtn from './components/login-btn';
 import AccountBtn from './components/account-btn';
-import Sidebar from '../sidebar/sidebar';
 
 interface HeaderProps {
     showSidebar: boolean;
     setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function Header({ showSidebar, setShowSidebar } : HeaderProps) {
-    const { isAuthenticated, userRole } = useAuth();
+function Header({ setShowSidebar } : HeaderProps) {
+    const { isAuthenticated } = useAuth();
 
     const toggleSidebar = () => {
         setShowSidebar(prev => !prev);

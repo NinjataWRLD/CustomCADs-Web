@@ -10,7 +10,7 @@ function HomePage() {
     return (
         <>
             <AnimatedPage>
-                <section className="my-4 mt-36 flex justify-between items-center">
+                <section className="my-4 mt-20 flex justify-between items-center">
                     <article className="h-full basis-8/12 shrink-0 flex flex-wrap items-center gap-y-8 text-center">
                         <h1 className="basis-full text-2xl md:text-3xl lg:text-6xl font-extrabold italic text-transparent bg-clip-text bg-gradient-to-r from-slate-400 via-green-400 to-slate-700 drop-shadow-2xl">{tPages('home.title')}</h1>
                         <span className="basis-full flex flex-col gap-y-3">
