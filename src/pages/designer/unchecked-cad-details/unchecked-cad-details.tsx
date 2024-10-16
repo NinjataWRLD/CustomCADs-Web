@@ -7,6 +7,7 @@ import ErrorPage from '@/components/error-page';
 import ThreeJS from '@/components/cads/three';
 import getStatusCode from '@/utils/get-status-code';
 import UncheckedCadDetailsCad, { emptyUncheckedCadDetailsCad } from './unchecked-cad-details.interface';
+import AnimatedPage from '@/components/animated-page';
 
 function UncheckedCadDetails() {
     const navigate = useNavigate();
@@ -48,33 +49,35 @@ function UncheckedCadDetails() {
 
     return (
         <>
-            <div className="mt-2 h-[60vh] flex flex-col justify-between">
-                <div className="basis-[80%] w-full self-center flex justify-around items-center">
-                    <button onClick={() => navigate(`/designer/cads/unchecked/${prevId}`)} disabled={!prevId} className={prevId ? "" : "opacity-50"}>
-                        <FontAwesomeIcon icon="circle-chevron-left" className="text-5xl text-indigo-800" />
-                    </button>
-                    <div className="h-full basis-1/2 rounded-3xl overflow-hidden">
-                        <ThreeJS cad={cad} />
+            <AnimatedPage>
+                <div className="mt-2 h-[60vh] flex flex-col justify-between">
+                    <div className="basis-[80%] w-full self-center flex justify-around items-center">
+                        <button onClick={() => navigate(`/designer/cads/unchecked/${prevId}`)} disabled={!prevId} className={prevId ? "" : "opacity-50"}>
+                            <FontAwesomeIcon icon="circle-chevron-left" className="text-5xl text-indigo-800" />
+                        </button>
+                        <div className="h-full basis-1/2 rounded-3xl overflow-hidden">
+                            <ThreeJS cad={cad} />
+                        </div>
+                        <button onClick={() => navigate(`/designer/cads/unchecked/${nextId}`)} disabled={!nextId} className={nextId ? "" : "opacity-50"}>
+                            <FontAwesomeIcon icon="circle-chevron-right" className="text-5xl text-indigo-800" />
+                        </button>
                     </div>
-                    <button onClick={() => navigate(`/designer/cads/unchecked/${nextId}`)} disabled={!nextId} className={nextId ? "" : "opacity-50"}>
-                        <FontAwesomeIcon icon="circle-chevron-right" className="text-5xl text-indigo-800" />
-                    </button>
+                    <div className="basis-[5%] flex justify-evenly">
+                        <button
+                            onClick={() => handlePatch('Validated')}
+                            className="bg-green-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-green-700 hover:opacity-80 active:bg-green-600"
+                        >
+                            <FontAwesomeIcon icon="check" className="text-2xl" />
+                        </button>
+                        <button
+                            onClick={() => handlePatch('Reported')}
+                            className="bg-red-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-red-700 hover:opacity-80 active:bg-red-600"
+                        >
+                            <FontAwesomeIcon icon="flag" className="text-2xl" />
+                        </button>
+                    </div>
                 </div>
-                <div className="basis-[5%] flex justify-evenly">
-                    <button
-                        onClick={() => handlePatch('Validated')}
-                        className="bg-green-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-green-700 hover:opacity-80 active:bg-green-600"
-                    >
-                        <FontAwesomeIcon icon="check" className="text-2xl" />
-                    </button>
-                    <button
-                        onClick={() => handlePatch('Reported')}
-                        className="bg-red-500 px-12 py-2 text-indigo-50 rounded-lg border-2 border-red-700 hover:opacity-80 active:bg-red-600"
-                    >
-                        <FontAwesomeIcon icon="flag" className="text-2xl" />
-                    </button>
-                </div>
-            </div>
+            </AnimatedPage>
         </>
     );
 }
