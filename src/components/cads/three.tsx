@@ -2,10 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { useGetHomeCad } from '@/hooks/requests/home';
-import ErrorPage from '@/components/error-page';
 import Spinner from '@/components/spinner';
-import getStatusCode from '@/utils/get-status-code';
 import ThreeJSCad from './three.interface';
 
 interface ThreeJSProps {
@@ -16,7 +13,7 @@ function ThreeJS({ cad }: ThreeJSProps) {
     const mountRef = useRef<HTMLDivElement>(null);
     const isTouchedRef = useRef(false);
     const [loader, setLoader] = useState(true);
-    
+
     useEffect(() => {
         if (cad.cadPath) {
             const scene = new THREE.Scene();
@@ -137,18 +134,6 @@ function ThreeJS({ cad }: ThreeJSProps) {
         }
 
     }, [loader, cad.id, cad.cadPath]);
-
-    if (cad) {
-        cad = cad;
-    } else {
-        const homeCadQuery = useGetHomeCad();
-        if (homeCadQuery.isError) {
-            return <ErrorPage status={getStatusCode(homeCadQuery.error)} />;
-        }
-        if (homeCadQuery.data) {
-            cad = homeCadQuery.data;
-        }
-    }
 
     return loader
         ? <>
