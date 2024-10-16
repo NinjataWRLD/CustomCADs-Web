@@ -9,6 +9,7 @@ import Pagination from '@/components/pagination';
 import ErrorPage from '@/components/error-page';
 import Tab from '@/components/tab';
 import Order from '@/components/order';
+import AnimatedPage from '@/components/animated-page';
 import objectToUrl from '@/utils/object-to-url';
 import capitalize from '@/utils/capitalize';
 import getStatusCode from '@/utils/get-status-code';
@@ -143,33 +144,35 @@ function UserOrders() {
     }
 
     return (
-        <div className="flex flex-wrap justify-center gap-y-12 mt-4 mb-8">
-            <div className="basis-full flex flex-col">
-                <h2 className="px-4 text-2xl text-indigo-950">
-                    <div className="flex justify-between items-center rounded-t-xl border-4 border-b border-indigo-700 overflow-hidden bg-indigo-500 text-center font-bold">
-                        <Tab to="/client/orders/pending" position='start' text={tPages('orders.pending_title')} isActive={checkStatus('Pending')} />
-                        <Tab to="/client/orders/begun" position='middle' text={tPages('orders.begun_title')} isActive={checkStatus('Begun')} />
-                        <Tab to="/client/orders/finished" position='end' text={tPages('orders.finished_title')} isActive={checkStatus('Finished')} />
-                    </div>
-                </h2>
-                <SearchBar setSearch={setSearch} />
+        <AnimatedPage>
+            <div className="flex flex-wrap justify-center gap-y-12 mt-4 mb-8">
+                <div className="basis-full flex flex-col">
+                    <h2 className="px-4 text-2xl text-indigo-950">
+                        <div className="flex justify-between items-center rounded-t-xl border-4 border-b border-indigo-700 overflow-hidden bg-indigo-500 text-center font-bold">
+                            <Tab to="/client/orders/pending" position='start' text={tPages('orders.pending_title')} isActive={checkStatus('Pending')} />
+                            <Tab to="/client/orders/begun" position='middle' text={tPages('orders.begun_title')} isActive={checkStatus('Begun')} />
+                            <Tab to="/client/orders/finished" position='end' text={tPages('orders.finished_title')} isActive={checkStatus('Finished')} />
+                        </div>
+                    </h2>
+                    <SearchBar setSearch={setSearch} />
+                </div>
+                {!orders.length ?
+                    <p className="text-lg text-indigo-900 text-center font-bold">{tPages('orders.no_orders')}</p>
+                    : <ul className="basis-full flex flex-wrap gap-y-8">
+                        {orders.map(order => <li key={order.id}>
+                            <Order order={order} buttons={chooseButtons(order)} />
+                        </li>)}
+                    </ul>}
+                <div className="basis-full" hidden={!orders.length}>
+                    <Pagination
+                        page={page}
+                        limit={limit}
+                        onPageChange={handlePageChange}
+                        total={total}
+                    />
+                </div>
             </div>
-            {!orders.length ?
-                <p className="text-lg text-indigo-900 text-center font-bold">{tPages('orders.no_orders')}</p>
-                : <ul className="basis-full flex flex-wrap gap-y-8">
-                    {orders.map(order => <li key={order.id}>
-                        <Order order={order} buttons={chooseButtons(order)} />
-                    </li>)}
-                </ul>}
-            <div className="basis-full" hidden={!orders.length}>
-                <Pagination
-                    page={page}
-                    limit={limit}
-                    onPageChange={handlePageChange}
-                    total={total}
-                />
-            </div>
-        </div>
+        </AnimatedPage>
     );
 }
 

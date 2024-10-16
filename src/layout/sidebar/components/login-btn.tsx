@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import HeaderBtn from './header-btn';
+import SidebarBtn from './sidebar-btn';
 
 function LoginBtn() {
     const { t: tLayout } = useTranslation('layout');
 
     return (
-        <Link to="/login" className='hover:no-underline'>
-            <HeaderBtn icon="user-secret" text={tLayout("header.login")} />
+        <Link to="/login">
+            <SidebarBtn icon="user-secret" text={tLayout("header.login")} />
         </Link>
     )
 }

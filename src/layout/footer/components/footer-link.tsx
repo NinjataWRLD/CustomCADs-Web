@@ -7,8 +7,8 @@ interface FooterLinkProps {
 
 function FooterLink({ to, text }: FooterLinkProps) {
     return (
-        <span className="text-sm font-bold underline">
-            <Link to={to} className="hover:italic hover:text-indigo-700">{text}</Link>
+        <span className="text-sm font-bold">
+            <Link to={to} className="hover:italic hover:underline">{text}</Link>
         </span>
     );
 }

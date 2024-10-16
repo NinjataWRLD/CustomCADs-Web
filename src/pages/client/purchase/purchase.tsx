@@ -9,6 +9,7 @@ import ErrorPage from '@/components/error-page';
 import Spinner from '@/components/spinner';
 import getStatusCode from '@/utils/get-status-code';
 import CheckoutForm from './components/checkout';
+import AnimatedPage from '@/components/animated-page';
 
 function PurchasePage() {
     const { t: tPages } = useTranslation('pages');
@@ -46,19 +47,21 @@ function PurchasePage() {
 
     return (
         <>
-            {!stripePromise ? <Spinner />
-                : <div className="min-h-96 flex place-content-center mt-8">
-                    <div className="basis-full flex flex-wrap items-center gap-y-4">
-                        <h1 className="basis-full text-4xl text-center text-indigo-900 font-bold">
-                            {tPages('orders.purchase_title')}
-                        </h1>
-                        <div className="h-4/6 basis-full">
-                            <Elements stripe={stripePromise}>
-                                <CheckoutForm id={Number(id)} onSubmit={handlePurchase} />
-                            </Elements>
+            <AnimatedPage>
+                {!stripePromise ? <Spinner />
+                    : <div className="min-h-96 flex place-content-center mt-8">
+                        <div className="basis-full flex flex-wrap items-center gap-y-4">
+                            <h1 className="basis-full text-4xl text-center text-indigo-900 font-bold">
+                                {tPages('orders.purchase_title')}
+                            </h1>
+                            <div className="h-4/6 basis-full">
+                                <Elements stripe={stripePromise}>
+                                    <CheckoutForm id={Number(id)} onSubmit={handlePurchase} />
+                                </Elements>
+                            </div>
                         </div>
-                    </div>
-                </div>}
+                    </div>}
+            </AnimatedPage>
         </>
     );
 }

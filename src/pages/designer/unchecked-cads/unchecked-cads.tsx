@@ -9,6 +9,7 @@ import Pagination from '@/components/pagination';
 import objectToUrl from '@/utils/object-to-url';
 import getStatusCode from '@/utils/get-status-code';
 import UncheckedCadsCad from './unchecked-cads.interface';
+import AnimatedPage from '@/components/animated-page';
 
 function UncheckedCads() {
     const { t: tPages } = useTranslation('pages');
@@ -38,29 +39,31 @@ function UncheckedCads() {
 
     return (
         <>
-            <div className="flex flex-col gap-y-8 mb-8">
-                <h1 className="text-4xl text-center text-indigo-950 font-bold">
-                    {tPages('designer.unchecked-cads_title')}
-                </h1>
-                <section className="flex flex-wrap justify-center gap-y-8">
-                    <SearchBar setSearch={setSearch} />
-                    {!cads.length
-                        ? <p className="text-lg text-indigo-900 text-center font-bold">
-                            {tPages('designer.no_cads')}
-                        </p>
-                        : <ul className="basis-full grid grid-cols-3 gap-12">
-                            {cads.map(cad => <CadItem key={cad.id} cad={cad} by />)}
-                        </ul>}
-                </section>
-                <div className="basis-full" hidden={!cads.length}>
-                    <Pagination
-                        page={page}
-                        limit={limit}
-                        onPageChange={handlePageChange}
-                        total={total}
-                    />
+            <AnimatedPage>
+                <div className="flex flex-col gap-y-8 mb-8">
+                    <h1 className="text-4xl text-center text-indigo-950 font-bold">
+                        {tPages('designer.unchecked-cads_title')}
+                    </h1>
+                    <section className="flex flex-wrap justify-center gap-y-8">
+                        <SearchBar setSearch={setSearch} />
+                        {!cads.length
+                            ? <p className="text-lg text-indigo-900 text-center font-bold">
+                                {tPages('designer.no_cads')}
+                            </p>
+                            : <ul className="basis-full grid grid-cols-3 gap-12">
+                                {cads.map(cad => <CadItem key={cad.id} cad={cad} by />)}
+                            </ul>}
+                    </section>
+                    <div className="basis-full" hidden={!cads.length}>
+                        <Pagination
+                            page={page}
+                            limit={limit}
+                            onPageChange={handlePageChange}
+                            total={total}
+                        />
+                    </div>
                 </div>
-            </div>
+            </AnimatedPage>
         </>
     );
 }

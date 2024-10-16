@@ -1,6 +1,6 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import HeaderBtn from './header-btn';
+import SidebarBtn from './sidebar-btn';
 
 function LanguageSelector() {
     const { i18n } = useTranslation();
@@ -19,7 +19,7 @@ function LanguageSelector() {
         i18n.changeLanguage(languages[languageIndex]);
     };
 
-    return <HeaderBtn onClick={handleClick} icon="globe" text={tLayout("header.language")} />;
+    return <SidebarBtn onClick={handleClick} icon="globe" text={tLayout("header.language")} />;
 }
 
 export default LanguageSelector;

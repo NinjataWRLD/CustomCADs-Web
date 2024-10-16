@@ -1,0 +1,118 @@
+.aside {
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 20em;
+    perspective-origin: 100px 0px;
+}
+
+.cube {
+    position: relative;
+    transform-style: preserve-3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: animate 15s linear infinite;
+    margin-bottom: 16em;
+    margin-right: 3em;
+}
+
+@keyframes animate {
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+.shadow {
+    position: absolute;
+    background: hsla(120, 77%, 64%, 0.628);
+    width: 26em;
+    height: 26em;
+    transform: translateZ(-230px) rotateX(90deg) rotateZ(3deg);
+    bottom: -22em;
+    left: 6em;
+    filter: blur(100px);
+    z-index: -1;
+}
+
+.top,
+.bottom,
+.left,
+.right,
+.front,
+.back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 11.2em;
+    width: 11.2em;
+    background: hsl(0, 0%, 0%);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-shadow:
+        inset 0 0 30px 5px hsla(0, 0%, 0%, 0.495),
+        0 0 50px 10px hsla(0, 1%, 22%, 0.703) inset,
+        0 0 0 13em hsl(120, 100%, 58%) inset;
+}
+
+.front {
+    transform: translateZ(5.5em);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.back {
+    transform: translateZ(-5.5em) rotateY(180deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.top {
+    transform: translateY(-5.5em) rotateX(90deg);
+    border-radius: 0.1em;
+}
+
+.bottom {
+    transform: translateY(5.5em) rotateX(90deg);
+    border-radius: 1em;
+}
+
+.right {
+    transform: translateX(5.5em) rotateY(90deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.left {
+    transform: translateX(-5.5em) rotateY(270deg);
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.right img,
+.front img,
+.left img,
+.back img {
+    width: 90%;
+    height: 90%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid rgba(0, 128, 0, 0.7);
+    box-shadow:
+        0 6px 6px rgba(0, 128, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.right img:hover,
+.front img:hover,
+.left img:hover,
+.back img:hover {
+    transform: scale(1.03);
+    box-shadow:
+        0 20px 30px rgba(53, 166, 43, 0.4),
+        0 10px 10px rgba(0, 128, 0, 0.4);
+    cursor: pointer;
+}

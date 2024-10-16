@@ -1,34 +1,37 @@
 ﻿import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 import useAuth from '@/hooks/useAuth';
 import HeaderBtn from './components/header-btn';
 import LoginBtn from './components/login-btn';
 import AccountBtn from './components/account-btn';
-import LanguageBtn from './components/language-btn';
+import Sidebar from '../sidebar/sidebar';
 
-function Header() {
-    const { t: tLayout } = useTranslation('layout');
+interface HeaderProps {
+    showSidebar: boolean;
+    setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function Header({ showSidebar, setShowSidebar } : HeaderProps) {
     const { isAuthenticated, userRole } = useAuth();
-    
+
+    const toggleSidebar = () => {
+        setShowSidebar(prev => !prev);
+    };
+
     return (
-        <header className="bg-gray-900 border-b border-indigo-700 rounded-b-lg py-4">
+        <header className="bg-gray-900 border-b bg-opacity-80 border-green-700 border-opacity-40 rounded-b-lg py-4">
             <ul className="flex justify-between items-center mx-5">
                 <li className="basis-1/3 flex justify-start items-center gap-x-6">
-                    <Link to={!isAuthenticated ? '/' : `/${userRole?.toLowerCase()}`} className="hover:no-underline">
-                        <HeaderBtn icon="home" text={tLayout("header.home")} orderReversed />
-                    </Link>
-                    <Link to="/gallery" className="hover:no-underline">
-                        <HeaderBtn icon="basket-shopping" text={tLayout("header.gallery")} orderReversed />
-                    </Link>
+                    <HeaderBtn icon={faBars} onClick={toggleSidebar} />
                 </li>
                 <li className="basis-1/3 flex justify-center">
-                    <Link to="/about" className="w-80">
+                    <Link to="/" className="w-80 hover:no-underline">
                         <img src="/logo.png" className="w-full h-auto hover:opacity-60 active:opacity-80" />
                     </Link>
                 </li>
-                <li className="basis-1/3 flex justify-end items-center gap-x-4">
+                <li className="basis-1/3 flex justify-end items-center gap-x-4 hover:no-underline">
                     {isAuthenticated ? <AccountBtn /> : <LoginBtn />}
-                    <LanguageBtn />
                 </li>
             </ul>
         </header>

@@ -1,19 +1,24 @@
 body {
-    background: #fff;
-    color: #000;
-    font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+    background: #000000;
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 28px;
-    margin: 0
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    text-align: center;
 }
 
 h1 {
     font-size: 40px;
-    line-height: 60px
+    line-height: 60px;
+    color: #ffffff;
 }
 
-h1, h2 {
-    font-weight: 700
+h1,
+h2 {
+    font-weight: 700;
+    color: #ffffff;
 }
 
 h2 {
@@ -26,7 +31,8 @@ h3 {
     line-height: 36px
 }
 
-h3, h4 {
+h3,
+h4 {
     font-weight: 700
 }
 
@@ -39,7 +45,8 @@ h5 {
     font-size: 16px
 }
 
-h5, h6 {
+h5,
+h6 {
     line-height: 24px;
     font-weight: 700
 }
@@ -54,17 +61,18 @@ a {
     color: #000
 }
 
-    a:hover, a[rel~=nofollow] {
-        text-decoration: underline
-    }
+a:hover,
+a[rel~=nofollow] {
+    text-decoration: underline
+}
 
-    a[rel~=nofollow] {
-        color: #0452a5
-    }
+a[rel~=nofollow] {
+    color: #0452a5
+}
 
-        a[rel~=nofollow]:hover {
-            text-decoration: none
-        }
+a[rel~=nofollow]:hover {
+    text-decoration: none
+}
 
 .visible {
     display: block
@@ -75,8 +83,13 @@ a {
 }
 
 .page {
+    color: white;
     width: 100%;
     margin: 2rem 0rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .container {
@@ -87,16 +100,16 @@ a {
 }
 
 .header {
-    color: #000;
+    color: #ffffff;
     padding: 16px 0
 }
 
-    .header .title {
-        font-size: 24px;
-        line-height: 24px;
-        font-weight: 700;
-        margin: 0
-    }
+.header .title {
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: 700;
+    margin: 0
+}
 
 .translations-list-container {
     color: #000;
@@ -104,32 +117,33 @@ a {
     margin: 0 0 16px
 }
 
-    .translations-list-container .translations-list {
-        margin: 0;
-        padding: 0;
-        list-style: none
-    }
+.translations-list-container .translations-list {
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
 
-        .translations-list-container .translations-list .translations-list-item {
-            display: inline-block;
-            padding: 0;
-            margin: 0 8px 8px 0;
-            color: #fff
-        }
+.translations-list-container .translations-list .translations-list-item {
+    display: inline-block;
+    padding: 0;
+    margin: 0 8px 8px 0;
+    color: #fff
+}
 
-            .translations-list-container .translations-list .translations-list-item a {
-                display: inline-block;
-                padding: 4px 8px
-            }
+.translations-list-container .translations-list .translations-list-item a {
+    display: inline-block;
+    padding: 4px 8px
+}
 
-                .translations-list-container .translations-list .translations-list-item a.active {
-                    color: #fff;
-                    background: #334055
-                }
+.translations-list-container .translations-list .translations-list-item a.active {
+    color: #fff;
+    background: #334055
+}
 
 .translations-content-container {
     padding-top: 8px;
-    border-top: 1px solid #eee
+    border-top: 1px solid #eee;
+    width: 80%;
 }
 
 .footer {

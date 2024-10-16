@@ -8,11 +8,11 @@ function Footer() {
     const { t: tLayout } = useTranslation('layout');
 
     return (
-        <footer className="justify-self-end py-4 text-indigo-900 border-t-2 border-indigo-300 rounded-t-lg bg-indigo-100 shadow-indigo-800 shadow-[bg-white_0_0_1em_0]">
+        <footer className="w-full py-4 text-green-200 border-t-2 bg-green-400 bg-opacity-15 border-green-700 border-opacity-20">
             <div className="flex justify-evenly items-center">
                 <section className="flex gap-6 underline-offset-4">
                     <FooterLink to="/policy" text={tLayout('footer.element_1')} />
-                    <FooterLink to="/about"  text={tLayout('footer.element_2')} />
+                    <FooterLink to="/about" text={tLayout('footer.element_2')} />
                 </section>
                 <section>
                     <FooterHeading />
