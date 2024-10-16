@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { ResetPassword } from '@/requests/public/identity';
+import { useResetPassword } from '@/hooks/requests/identity';
+import ErrorPage from '@/components/error-page';
+import getStatusCode from '@/utils/get-status-code';
 
 function ResetPasswordPage() {
     const [password, setPassword] = useState('');
@@ -8,22 +10,27 @@ function ResetPasswordPage() {
     const [success, setSuccess] = useState(false);
 
     const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
-    const email = searchParams.get('email');
-    console.log(token)
+    const token = searchParams.get('token') ?? '';
+    const email = searchParams.get('email') ?? '';
+
+    const resetPasswordMutation = useResetPassword();
+
     const handleClick = async () => {
-        try {
-            if (password === confirmPassword) {
-                await ResetPassword(email!, token!, password);
+        const dto = { email, token, password };
+        if (password === confirmPassword) {
+            await resetPasswordMutation.mutateAsync(dto);
+            if (resetPasswordMutation.isSuccess) {
                 setSuccess(true);
-            } else {
-                alert('Passwords do not match.');
             }
-        } catch (e) {
-            console.error(e);
-            alert('Expired token');
+        } else {
+            alert('Passwords do not match.');
         }
     };
+
+    if (resetPasswordMutation.isError) {
+        const status = getStatusCode(resetPasswordMutation.error);
+        return <ErrorPage status={status} />
+    }
 
     return (
         <div className="flex flex-col items-center my-20 gap-y-4">

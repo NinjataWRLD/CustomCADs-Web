@@ -1,55 +1,52 @@
 import { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
-import { IsAuthenticated } from '@/requests/public/identity';
+import { useIsAuthenticated } from '@/hooks/requests/identity';
 import { getCookie } from '@/utils/cookie-manager';
 
 interface AuthContextValues {
     username: string | null
     userRole: string | null
     isAuthenticated: boolean | null
-    isLoading: boolean
     setIsAuthenticated: Dispatch<SetStateAction<boolean | null>>
+    is: {
+        error: boolean,
+        loading: boolean,
+    }
 }
 
-const defaultValues: AuthContextValues = { username: '', userRole: '', isAuthenticated: false, isLoading: true, setIsAuthenticated: () => { } };
+const defaultValues: AuthContextValues = { username: '', userRole: '', isAuthenticated: false, setIsAuthenticated: () => { }, is: { loading: true, error: false } };
 export const AuthContext = createContext(defaultValues);
 
 interface AuthProviderProps {
     children: ReactNode
 }
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [username, setUsername] = useState<string | null>(getCookie('username') ?? null);
-    const [userRole, setUserRole] = useState<string | null>(getCookie('role') ?? null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [username, setUsername] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
+    const isAuthenticatedQuery = useIsAuthenticated();
     useEffect(() => {
-        checkUserAuthentication();
-    }, []);
+        if (isAuthenticatedQuery.data !== undefined) {
+            if (isAuthenticatedQuery.data) {
+                setIsAuthenticated(true);
+            } else {
+                setIsAuthenticated(false);
+            }
+        }
+    }, [isAuthenticatedQuery.data]);
 
     useEffect(() => {
         if (isAuthenticated) {
             setUsername(getCookie('username') ?? '');
             setUserRole(getCookie('role') ?? '');
+        } else {
+            setUsername('');
+            setUserRole('');
         }
     }, [isAuthenticated]);
 
-    async function checkUserAuthentication() {
-        try {
-            const { data } = await IsAuthenticated();
-            if (data) {
-                setIsAuthenticated(true);
-            } else {
-                setIsAuthenticated(false);
-            }
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
     return (
-        <AuthContext.Provider value={{ username, userRole, isLoading, isAuthenticated, setIsAuthenticated }}>
+        <AuthContext.Provider value={{ username, userRole, isAuthenticated, setIsAuthenticated, is: { loading: isAuthenticatedQuery.isLoading, error: isAuthenticatedQuery.isError }, }}>
             {children}
         </AuthContext.Provider>
     );

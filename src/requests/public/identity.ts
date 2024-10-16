@@ -6,8 +6,8 @@ const Register = async (role: string, user: IRegister) => {
     return await axios.post(`/API/Identity/Register/${role}`, user);
 };
 
-const VerifyEmail = async (username: string, ect: string) => {
-    return await axios.get(`/API/Identity/VerifyEmail/${username}?ect=${ect}`);
+const VerifyEmail = async (username: string, token: string) => {
+    return await axios.get(`/API/Identity/VerifyEmail/${username}?token=${token}`);
 };
 
 const RetryVerifyEmail = async (username: string) => {

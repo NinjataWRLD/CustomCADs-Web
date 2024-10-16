@@ -1,15 +1,15 @@
-import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import { Login } from '@/requests/public/identity';
+import { useLogin } from '@/hooks/requests/identity';
 import useAuth from '@/hooks/useAuth';
+import ILogin from '@/interfaces/login';
 import Input from '@/components/fields/input';
 import Password from '@/components/fields/password';
 import { getCookie } from '@/utils/cookie-manager';
+import getStatusCode from '@/utils/get-status-code';
 import loginValidations from './login-validations';
-import ILogin from '@/interfaces/login';
 
 function LoginPage() {
     const { setIsAuthenticated } = useAuth();
@@ -19,25 +19,24 @@ function LoginPage() {
     const [rememberMe, setRememberMe] = useState(false);
     const { register, formState, handleSubmit, watch } = useForm<ILogin>({ mode: 'onTouched' });
     const { username, password } = loginValidations();
+    const loginMutation = useLogin();
 
+    let seconds: number = 0;
     const onSubmit = async (user: ILogin) => {
-        try {
-            await Login({ ...user, rememberMe });
-            setIsAuthenticated(true);
+        const dto = { ...user, rememberMe };
+        await loginMutation.mutateAsync({ user: dto });
+        seconds = loginMutation.data?.data.seconds ?? 0;
 
-            const role = getCookie('role')!;
-            navigate(`/${role.toLowerCase()}`);
-        } catch (e) {
-            if (!(e instanceof AxiosError)) {
-                return;
-            }
-            const { status, data } = e.response!;
+        setIsAuthenticated(true);
+        navigate(`/${getCookie('role')?.toLowerCase()}`);
+    }
 
-            switch (status) {
-                case 401: alert(tCommon('errors.sign_in_error')); break;
-                case 423: alert(tCommon('errors.locked_out_error', { seconds: data.seconds })); break;
-                default: break;
-            }
+    if (loginMutation.isError) {
+        const status = getStatusCode(loginMutation.error);
+        switch (status) {
+            case 401: alert(tCommon('errors.sign_in_error')); break;
+            case 423: alert(tCommon('errors.locked_out_error', { seconds: seconds })); break;
+            default: break;
         }
     }
 

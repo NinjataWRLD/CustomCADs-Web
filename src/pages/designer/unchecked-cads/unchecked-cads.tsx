@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useGetCadsByStatus } from '@/hooks/requests/designer';
 import usePagination from '@/hooks/usePagination';
-import { GetCadsByStatus } from '@/requests/private/designer';
+import ErrorPage from '@/components/error-page';
 import CadItem from '@/components/cads/item';
 import SearchBar from '@/components/searchbar';
 import Pagination from '@/components/pagination';
 import objectToUrl from '@/utils/object-to-url';
+import getStatusCode from '@/utils/get-status-code';
 import UncheckedCadsCad from './unchecked-cads.interface';
 
 function UncheckedCads() {
@@ -15,10 +17,24 @@ function UncheckedCads() {
     const [total, setTotal] = useState(0);
     const { page, limit, handlePageChange } = usePagination(total, 12);
 
+    const requestSearchParams = objectToUrl({ ...search });
+    const cadsQuery = useGetCadsByStatus(requestSearchParams);
     useEffect(() => {
-        fetchCads();
+        if (cadsQuery.data) {
+            const { cads, count } = cadsQuery.data;
+            setCads(cads);
+            setTotal(count);
+        }
+    }, [cadsQuery.data]);
+
+    useEffect(() => {
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [search, page]);
+
+    if (cadsQuery.isError) {
+        const status = getStatusCode(cadsQuery.error);
+        return <ErrorPage status={status} />
+    }
 
     return (
         <>
@@ -47,17 +63,6 @@ function UncheckedCads() {
             </div>
         </>
     );
-
-    async function fetchCads() {
-        const requestSearchParams = objectToUrl({ ...search });
-        try {
-            const { data: { cads, count } } = await GetCadsByStatus(requestSearchParams);
-            setCads(cads);
-            setTotal(count);
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default UncheckedCads;

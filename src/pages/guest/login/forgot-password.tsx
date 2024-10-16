@@ -1,16 +1,9 @@
 import { useState } from 'react';
-import { ForgotPassword } from '@/requests/public/identity';
+import { useForgotPassword } from '@/hooks/requests/identity';
 
 function ForgotPasswordPage() {
-    const [email, setEmail] = useState('');
-
-    const handleClick = async () => {
-        try {
-            await ForgotPassword(email);
-        } catch (e) {
-            console.error(e);
-        }
-    };
+    const [email, setEmail] = useState<string>('');
+    const handleClick = () => useForgotPassword(email);
 
     return (
         <div className="flex flex-col items-center my-20 gap-y-4">  

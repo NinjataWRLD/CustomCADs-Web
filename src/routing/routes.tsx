@@ -9,14 +9,23 @@ import clientRoutes from './routes/client';
 import contributorRoutes from './routes/contributor';
 import designerRoutes from './routes/designer';
 
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: false,
+            refetchOnWindowFocus: false,
+        }
+    }
+});
+
 const userRoutes: RouteObject = {
     path: '/',
     element:
-        <AuthProvider>
-            <QueryClientProvider client={new QueryClient()}>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
                 <App />
-            </QueryClientProvider>
-        </AuthProvider>,
+            </AuthProvider>
+        </QueryClientProvider>,
     children: [
         publicRoutes,
         guestRoutes,

@@ -3,21 +3,20 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useQuery } from '@tanstack/react-query';
-import { GetCad, PutCad, PatchCad, DeleteCad } from '@/requests/private/cads';
 import Category from '@/interfaces/category';
 import useAuth from '@/hooks/useAuth';
-import useCategories from '@/hooks/useCategories';
+import { useGetCategories } from '@/hooks/requests/categories';
+import { useDeleteCad, useGetCad, usePatchCad, usePutCad } from '@/hooks/requests/cads';
 import ThreeJS from '@/components/cads/three';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import ErrorPage from '@/components/error-page';
-import ICoordinates from '@/interfaces/coordinates';
+import Coordinates from '@/interfaces/coordinates';
 import getStatusCode from '@/utils/get-status-code';
 import CadDetailsCad, { emptyCadDetailsCad } from './cad-details.interface';
 
 interface SavePositionEvent {
-    camCoords: ICoordinates
-    panCoords: ICoordinates
+    camCoords: Coordinates
+    panCoords: Coordinates
 }
 
 interface CadForm {
@@ -35,7 +34,6 @@ const emptyForm: CadForm = {
     image: null,
 }
 
-
 function EditCadPage() {
     const { userRole } = useAuth();
     const { t: tPages } = useTranslation('pages');
@@ -43,30 +41,26 @@ function EditCadPage() {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
-
-    let categories: Category[] = [];
-    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
-    if (categoriesData) {
-        categories = categoriesData;
-    }
-
+    const [categories, setCategories] = useState<Category[]>([]);
     const [cad, setCad] = useState<CadDetailsCad>(emptyCadDetailsCad);
     const [oldCad, setOldCad] = useState<CadForm>(emptyForm);
-    const { data: cadData, isError: cadIsError, error: cadError } = useQuery({
-        queryKey: ['cad-details', id],
-        queryFn: async () => {
-            const { data } = await GetCad(Number(id));
-            return data;
-        }
-    });
+    const { register, watch, reset, handleSubmit } = useForm<CadForm>({ defaultValues: emptyForm });
 
+    const categoriesQuery = useGetCategories();
     useEffect(() => {
-        if (cadData) {
-            setCad(cadData);
-            setOldCad({ name: cadData.name, description: cadData.description, categoryId: cadData.category.id, price: cadData.price, image: null });
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
         }
-    }, [cadData, reset]);
+    }, [categoriesQuery.data]);
+
+    const cadQuery = useGetCad(Number(id));
+    useEffect(() => {
+        if (cadQuery.data) {
+            setCad(cadQuery.data);
+            const { name, description, category, price } = cadQuery.data;
+            setOldCad({ name, description, categoryId: category.id, price, image: null });
+        }
+    }, [cadQuery.data, reset]);
 
     useEffect(() => {
         if (JSON.stringify(oldCad) !== JSON.stringify(emptyForm)) {
@@ -89,8 +83,9 @@ function EditCadPage() {
 
             setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged || priceIsChanged || imageIsChanged);
         }
-    }, [cadData, watch()]);
+    }, [cadQuery.data, watch()]);
 
+    const patchCadMutation = usePatchCad();
     useEffect(() => {
         const flipIsChanged = () => {
             setIsPositionChanged(true);
@@ -103,8 +98,8 @@ function EditCadPage() {
             const { camCoords, panCoords } = e.detail;
 
             try {
-                await PatchCad(Number(id), 'camera', camCoords);
-                await PatchCad(Number(id), 'pan', panCoords);
+                patchCadMutation.mutateAsync({ id: Number(id), type: 'camera', coords: camCoords });
+                patchCadMutation.mutateAsync({ id: Number(id), type: 'pan', coords: panCoords });
 
                 setIsPositionChanged(false);
                 setTimeout(sendTrackChangesEvent, 1500);
@@ -129,15 +124,7 @@ function EditCadPage() {
         };
     }, []);
 
-    if (categoriesIsError) {
-        const status = getStatusCode(categoriesError);
-        return <ErrorPage status={status} />;
-    }
-    if (cadIsError) {
-        const status = getStatusCode(cadError);
-        return <ErrorPage status={status} />;
-    }
-    
+    const putCadMutation = usePutCad();
     const onSubmit = async (cad: CadForm) => {
         try {
             const dto = {
@@ -147,8 +134,8 @@ function EditCadPage() {
                 price: cad.price,
                 image: cad.image?.item(0)
             };
-            await PutCad(Number(id), dto);
-
+            await putCadMutation.mutateAsync({ id: Number(id), cad: dto });
+            
             setIsEditing(false);
             reset(cad || {});
             setOldCad(cad);
@@ -157,16 +144,30 @@ function EditCadPage() {
         }
     };
 
+    const deleteCadMutation = useDeleteCad();
     const handleDelete = async () => {
         if (confirm(tPages('cads.confirmation'))) {
             try {
-                await DeleteCad(Number(id));
+                await deleteCadMutation.mutateAsync({ id: Number(id) });
                 navigate(`/${userRole?.toLowerCase()}/cads`);
             } catch (e) {
                 console.error(e);
             }
         }
     };
+
+    if (categoriesQuery.isError) {
+        const status = getStatusCode(categoriesQuery.error);
+        return <ErrorPage status={status} />;
+    }
+    if (cadQuery.isError) {
+        const status = getStatusCode(cadQuery.error);
+        return <ErrorPage status={status} />;
+    }
+    if (patchCadMutation.isError) {
+        const status = getStatusCode(patchCadMutation.error);
+        return <ErrorPage status={status} />;
+    }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">

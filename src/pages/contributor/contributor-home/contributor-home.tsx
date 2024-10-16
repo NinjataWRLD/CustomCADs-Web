@@ -1,53 +1,53 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query';
-import { GetCadsCounts, GetRecentCads } from '@/requests/private/cads';
+import { useGetCadsCounts, useGetRecentCads } from '@/hooks/requests/cads';
 import RecentItem from '@/components/dashboard/recent-item';
 import CadsCount from '@/components/dashboard/count-item';
 import ErrorPage from '@/components/error-page';
 import getStatusCode from '@/utils/get-status-code';
 import ContributorHomeCad from './contributor-home.interface';
 
+interface CountByStatus {
+    unchecked: number
+    validated: number
+    reported: number
+    banned: number
+}
+const emptyCountByStatus: CountByStatus = {
+    unchecked: 0,
+    validated: 0,
+    reported: 0,
+    banned: 0,
+};
+
 function ContributorHome() {
     const { t: tPages } = useTranslation('pages');
     const { t: tCommon } = useTranslation('common');
+    const [cads, setCads] = useState<ContributorHomeCad[]>([]);
+    const [counts, setCounts] = useState<CountByStatus>(emptyCountByStatus);
 
-    interface CountByStatus {
-        unchecked: number
-        validated: number
-        reported: number
-        banned: number
-    }
 
-    let cads: ContributorHomeCad[] = [];
-    const { data: cadsData, isError: cadsIsError, error: cadsError } = useQuery({
-        queryKey: ['contributor-home', 'cads'],
-        queryFn: async () => {
-            const { data } = await GetRecentCads();
-            return data;
+    const cadsQuery = useGetRecentCads('contributor-home');
+    useEffect(() => {
+        if (cadsQuery.data) {
+            setCads(cadsQuery.data);
         }
-    });
-    if (cadsIsError) {
-        const status = getStatusCode(cadsError);
+    }, [cadsQuery.data]);
+
+    const countsQuery = useGetCadsCounts('contributor-home');
+    if (countsQuery.isError) {
+        const status = getStatusCode(countsQuery.error);
         return <ErrorPage status={status} />;
     }
-    if (cadsData) {
-        cads = cadsData;
-    }
-
-    let counts: CountByStatus = { unchecked: 0, validated: 0, reported: 0, banned: 0 };
-    const { data: countsData, isError: countsIsError, error: countsError } = useQuery({
-        queryKey: ['contributor-home', 'counts'],
-        queryFn: async () => {
-            const { data } = await GetCadsCounts();
-            return data;
+    useEffect(() => {
+        if (countsQuery.data) {
+            setCounts(countsQuery.data);
         }
-    });
-    if (countsIsError) {
-        const status = getStatusCode(countsError);
+    }, [countsQuery.data]);
+
+    if (cadsQuery.isError) {
+        const status = getStatusCode(cadsQuery.error);
         return <ErrorPage status={status} />;
-    }
-    if (countsData) {
-        counts = countsData;
     }
 
     return (

@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Disclosure, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Logout } from '@/requests/public/identity';
+import { useLogout } from '@/hooks/requests/identity';
 import useAuth from '@/hooks/useAuth';
 import HeaderBtn from './header-btn';
 
@@ -12,16 +12,12 @@ function AccountBtn() {
     const { t: tCommon } = useTranslation('common');
     const { userRole, username, setIsAuthenticated } = useAuth();
 
+    const logoutMutation = useLogout();
+
     const handleLogout = async () => {
-        try {
-            await Logout();
-            setIsAuthenticated(false);
-            navigate('/');
-        } catch (e) {
-            if (e instanceof AxiosError) {
-                alert(e.response?.data);
-            }
-        }
+        await logoutMutation.mutateAsync();
+        setIsAuthenticated(false);
+        navigate('/');
     };
 
     return (

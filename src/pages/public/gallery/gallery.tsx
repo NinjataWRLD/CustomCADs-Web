@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useGallery } from '@/hooks/requests/home';
 import usePagination from '@/hooks/usePagination';
-import objectToUrl from '@/utils/object-to-url';
-import { Gallery } from '@/requests/public/home';
 import ErrorPage from '@/components/error-page';
 import SearchBar from '@/components/searchbar';
 import Pagination from '@/components/pagination';
 import CadItem from '@/components/cads/item';
+import objectToUrl from '@/utils/object-to-url';
 import getStatusCode from '@/utils/get-status-code';
 import GalleryPageCad from './gallery.interface';
 
@@ -20,23 +20,17 @@ function GalleryPage() {
     let cads: GalleryPageCad[] = [];
 
     useEffect(() => {
-        document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, [search, page]);
 
-    const { data, isError, error } = useQuery({
-        queryKey: ['gallery', search, page],
-        queryFn: async () => {
-            const requestSearchParams = objectToUrl({ ...search, page, limit });
-            const { data } = await Gallery(requestSearchParams);
-            return data;
-        },
-    });
-    if (isError) {
-        return <ErrorPage status={getStatusCode(error)} />
+    const requestSearchParams = objectToUrl({ ...search, page, limit });
+    const galleryQuery = useGallery(requestSearchParams);
+    if (galleryQuery.isError) {
+        return <ErrorPage status={getStatusCode(galleryQuery.error)} />
     }
-    if (data) {
-        cads = data.cads;
-        total = data.count;
+    if (galleryQuery.data) {
+        cads = galleryQuery.data.cads;
+        total = galleryQuery.data.count;
     }
 
     return (

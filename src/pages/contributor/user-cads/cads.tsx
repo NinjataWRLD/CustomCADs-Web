@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { GetCads } from '@/requests/private/cads';
+import { useGetCads } from '@/hooks/requests/cads';
 import usePagination from '@/hooks/usePagination';
 import ErrorPage from '@/components/error-page';
 import SearchBar from '@/components/searchbar';
@@ -22,24 +21,19 @@ function UserCads() {
         document.documentElement.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }, [search, page]);
 
-    const { data, isError, error } = useQuery({
-        queryKey: ['cads'],
-        queryFn: async () => {
-            const requestSearchParams = objectToUrl({ ...search });
-            const { data } = await GetCads(requestSearchParams);
-            return data;
-        }
-    });
-    
-    useEffect(() => {
-        if (data) {
-            setCads(data.cads);
-            setTotal(data.count);
-        }
-    }, [data]);
+    const requestSearchParams = objectToUrl({ ...search });
+    const cadsQuery = useGetCads(requestSearchParams);
 
-    if (isError) {
-        const status = getStatusCode(error);
+    useEffect(() => {
+        if (cadsQuery.data) {
+            const { cads, count } = cadsQuery.data;
+            setCads(cads);
+            setTotal(count);
+        }
+    }, [cadsQuery.data]);
+
+    if (cadsQuery.isError) {
+        const status = getStatusCode(cadsQuery.error);
         return <ErrorPage status={status} />
     }
 

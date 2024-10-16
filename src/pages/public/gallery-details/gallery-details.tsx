@@ -1,9 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { GalleryCad } from '@/requests/public/home';
-import ErrorPage from '@/components/error-page';
+import { useGalleryDetails } from '@/hooks/requests/home';
 import useAuth from '@/hooks/useAuth';
+import ErrorPage from '@/components/error-page';
 import ThreeJS from '@/components/cads/three';
 import getStatusCode from '@/utils/get-status-code';
 import GalleryDetailsCad, { emptyGalleryDetailsCad } from './gallery-details.interface';
@@ -15,14 +14,15 @@ function GalleryDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const { data, isError, error } = useQuery({ 
-        queryKey: ['gallery-details', id], 
-        queryFn: () => GalleryCad(Number(id)).then(res => res.data) 
-    });
-    if (isError) {
-        return <ErrorPage status={getStatusCode(error)} />
+    let cad: GalleryDetailsCad = emptyGalleryDetailsCad;
+    const galleryDetailsQuery = useGalleryDetails(Number(id));
+    if (galleryDetailsQuery.isError) {
+        const status = getStatusCode(galleryDetailsQuery.error);
+        return <ErrorPage status={status} />
     }
-    const cad: GalleryDetailsCad = data || emptyGalleryDetailsCad;
+    if (galleryDetailsQuery.data) {
+        cad = galleryDetailsQuery.data;
+    }
 
     const handleBuy = async () => {
         if (userRole !== 'Client') {

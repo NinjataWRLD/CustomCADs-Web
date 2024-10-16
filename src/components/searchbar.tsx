@@ -1,10 +1,11 @@
 import { useState, useEffect, Dispatch, SetStateAction, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { GetSortings } from '@/requests/public/home';
-import { GetCategories } from '@/requests/public/categories';
+import { useGetCategories } from '@/hooks/requests/categories';
+import { useGetSortings } from '@/hooks/requests/home';
 import Input from './fields/input';
 import Select from './fields/select';
+import Category from '@/interfaces/category';
 
 interface Search {
     name: string
@@ -18,14 +19,23 @@ interface SearchBarProps {
 
 function SearchBar({ setSearch }: SearchBarProps) {
     const { t: tCommon } = useTranslation('common');
-    const [sortings, setSortings] = useState([]);
-    const [categories, setCategories] = useState([]);
+    const [sortings, setSortings] = useState<string[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [copySearch, setCopySearch] = useState<Search>({ name: '', category: '', sorting: '' });
-
+    
+    const categoriesQuery = useGetCategories();
     useEffect(() => {
-        getCategories();
-        getSortings();
-    }, []);
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
+        }
+    }, [categoriesQuery.data]);
+
+    const sortingsQuery = useGetSortings();
+    useEffect(() => {
+        if (sortingsQuery.data) {
+            setSortings(sortingsQuery.data);
+        }
+    }, [sortingsQuery.data]);
 
     useEffect(() => {
         handleSearch();
@@ -42,7 +52,7 @@ function SearchBar({ setSearch }: SearchBarProps) {
         setSearch(oldQuery => ({ ...oldQuery, ...copySearch }));
     };
 
-    const categoryMap = (category: { id: number, name: string }) =>
+    const categoryMap = (category: Category) =>
         <option key={category.id} value={category.name}>
             {tCommon(`categories.${category.name}`)}
         </option>;
@@ -102,28 +112,6 @@ function SearchBar({ setSearch }: SearchBarProps) {
             </form>
         </div>
     );
-
-    async function getCategories() {
-        try {
-            const { data } = await GetCategories();
-            if (data) {
-                setCategories(data);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    async function getSortings() {
-        try {
-            const { data } = await GetSortings();
-            if (data) {
-                setSortings(data);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
 }
 
 export default SearchBar;

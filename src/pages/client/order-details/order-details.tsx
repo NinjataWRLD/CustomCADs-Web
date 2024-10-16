@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { GetOrder, PutOrder } from '@/requests/private/orders';
 import Category from '@/interfaces/category';
-import useCategories from '@/hooks/useCategories';
+import { useGetCategories } from '@/hooks/requests/categories';
+import { useGetOrder, usePutOrder } from '@/hooks/requests/orders';
 import ErrorPage from '@/components/error-page';
 import { dateToMachineReadable } from '@/utils/date-manager';
 import getStatusCode from '@/utils/get-status-code';
@@ -30,27 +30,24 @@ function OrderDetails() {
     const [order, setOrder] = useState<OrderDetailsOrder>(emptyOrderDetailsOrder);
     const [oldOrder, setOldOlder] = useState<OrderForm>(emptyForm);
 
-    let categories: Category[] = [];
-    const { data: categoriesData, isError: categoriesIsError, error: categoriesError } = useCategories();
-    if (categoriesData) {
-        categories = categoriesData;
-    }
-
-    const { data: orderData, isError: orderIsError, error: orderError } = useQuery({
-        queryKey: ['order-details', id],
-        queryFn: async () => {
-            const { data } = await GetOrder(Number(id));
-            return data;
+    const [categories, setCategories] = useState<Category[]>([]);
+    const categoriesQuery = useGetCategories();
+    useEffect(() => {
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
         }
-    });
+    }, [categoriesQuery.data]);
 
     const { register, watch, reset, handleSubmit } = useForm<OrderForm>({ defaultValues: emptyForm });
+    const orderQuery = useGetOrder(Number(id));
     useEffect(() => {
-        if (orderData) {
-            setOrder(orderData);
-            setOldOlder({ name: orderData.name, description: orderData.description, categoryId: orderData.category.id });
+        if (orderQuery.data) {
+            setOrder(orderQuery.data);
+            const { name, description, category } = orderQuery.data;
+            const dto = { name, description, categoryId: category.id };
+            setOldOlder(dto);
         }
-    }, [orderData]);
+    }, [orderQuery.data]);
 
     useEffect(() => {
         if (JSON.stringify(oldOrder) !== JSON.stringify(emptyForm)) {
@@ -70,11 +67,13 @@ function OrderDetails() {
 
             setIsEditing(nameIsChanged || descriptionIsChanged || categoryIdIsChanged);
         }
-    }, [orderData, watch()]);
+    }, [orderQuery.data, watch()]);
 
+    const putOrderMutation = usePutOrder();
     const onSubmit = async (order: OrderForm) => {
         try {
-            await PutOrder(Number(id), order);
+            const dto = { name: order.name, description: order.description, categoryId: Number(order.categoryId) };
+            await putOrderMutation.mutateAsync({ id: Number(id), order: dto });
             setIsEditing(false);
             reset(order);
             setOldOlder(order);
@@ -82,14 +81,14 @@ function OrderDetails() {
             console.error(e);
         }
     };
-    
-    if (categoriesIsError) {
-        const status = getStatusCode(categoriesError);
+
+    if (categoriesQuery.isError) {
+        const status = getStatusCode(categoriesQuery.error);
         return <ErrorPage status={status} />
     }
 
-    if (orderIsError) {
-        const status = getStatusCode(orderError);
+    if (orderQuery.isError) {
+        const status = getStatusCode(orderQuery.error);
         return <ErrorPage status={status} />
     }
 

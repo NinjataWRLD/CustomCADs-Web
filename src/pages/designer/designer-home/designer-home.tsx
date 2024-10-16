@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
-import { useLoaderData } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useQuery } from '@tanstack/react-query';
-import { GetRecentCads } from '@/requests/private/cads';
-import { GetRecentOrders } from '@/requests/private/designer';
+import { useGetRecentCads } from '@/hooks/requests/cads';
+import { useGetRecentOrders } from '@/hooks/requests/designer';
 import ErrorPage from '@/components/error-page';
 import RecentItem from '@/components/dashboard/recent-item';
 import { getCookie, setCookie } from '@/utils/cookie-manager';
@@ -21,37 +19,21 @@ function DesignerHome() {
         setCookie('designer_dashboard_orders_status', status);
     }, [status]);
 
-    let orders: DesignerHomeOrder[] = [];
-    const { data: ordersData, isError: ordersIsError, error: ordersError } = useQuery({
-        queryKey: ['designer-home', 'recent-orders', status],
-        queryFn: async () => {
-            const { data } = await GetRecentOrders(status);
-            return data;
+    const [orders, setOrders] = useState<DesignerHomeOrder[]>([]);
+    const recentOrdersQuery = useGetRecentOrders(status);
+    useEffect(() => {
+        if (recentOrdersQuery.data) {
+            setOrders(recentOrdersQuery.data);
         }
-    });
-    if (ordersIsError) {
-        const status = getStatusCode(ordersError);
-        return <ErrorPage status={status} />
-    }
-    if (ordersData) {
-        orders = ordersData;
-    }
+    }, [recentOrdersQuery.data]);
 
-    let cads: DesignerHomeCad[] = [];
-    const { data: cadsData, isError: cadsIsError, error: cadsError } = useQuery({
-        queryKey: ['designer-home', 'recent-cads'],
-        queryFn: async () => {
-            const { data } = await GetRecentCads();
-            return data;
+    const [cads, setCads] = useState<DesignerHomeCad[]>([]);
+    const recentCadsQuery = useGetRecentCads();
+    useEffect(() => {
+        if (recentCadsQuery.data) {
+            setCads(recentCadsQuery.data);
         }
-    });
-    if (cadsIsError) {
-        const status = getStatusCode(cadsError);
-        return <ErrorPage status={status} />
-    }
-    if (cadsData) {
-        cads = cadsData;
-    }
+    }, [recentCadsQuery.data]);
     
     const handlePrev = () => {
         switch (status) {
@@ -67,6 +49,15 @@ function DesignerHome() {
             case 'Finished': setStatus('Pending'); break;
         }
     };
+    
+    if (recentCadsQuery.isError) {
+        const status = getStatusCode(recentCadsQuery.error);
+        return <ErrorPage status={status} />
+    }
+    if (recentOrdersQuery.isError) {
+        const status = getStatusCode(recentOrdersQuery.error);
+        return <ErrorPage status={status} />
+    }
 
     return (
         <div className="flex flex-col gap-y-6 my-2">

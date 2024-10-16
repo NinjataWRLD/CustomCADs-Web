@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import Category from '@/interfaces/category';
 import useAuth from '@/hooks/useAuth';
-import { GetCategories } from '@/requests/public/categories';
-import { PostCad } from '@/requests/private/cads';
-import { FinishOrder } from '@/requests/private/designer';
+import { useGetCategories } from '@/hooks/requests/categories';
+import { usePostCad } from '@/hooks/requests/cads';
+import { useFinishOrder } from '@/hooks/requests/designer';
 import UploadCadBtn from '@/components/fields/upload-cad-btn';
 import FileInput from '@/components/fields/file-input';
 import Input from '@/components/fields/input';
@@ -34,23 +34,35 @@ function UploadCad() {
     const { register, formState, handleSubmit } = useForm<CadForm>({ mode: 'onTouched' });
     const { name, description, categoryId, price } = cadValidations();
 
+    const categoriesQuery = useGetCategories();
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        if (categoriesQuery.data) {
+            setCategories(categoriesQuery.data);
+        }
+    });
 
+    const postCadMutation = usePostCad();
+    const finishOrderMutation = useFinishOrder();
     const onSubmit = async (cad: CadForm) => {
-        try {
-            const { data } = await PostCad({ ...cad, image, file });
-            if (userRole === 'Designer') {
-                if (id) {
-                    await FinishOrder(Number(id), data.id);
-                }
-                navigate(`/designer/cads/${data.id}`);
-            } else {
-                navigate('/contributor/cads');
+        if (!file || !image) {
+            return;
+        }
+
+        const dto = {
+            name: cad.name,
+            description: cad.description,
+            categoryId: Number(cad.categoryId),
+            price: Number(cad.price),
+        };
+        const { data } = await postCadMutation.mutateAsync({ cad: dto, file, image });
+
+        if (userRole === 'Designer') {
+            if (id) {
+                await finishOrderMutation.mutateAsync({ id: Number(id), cadId: data.id });
             }
-        } catch (e) {
-            console.error(e);
+            navigate(`/designer/cads/${data.id}`);
+        } else {
+            navigate('/contributor/cads');
         }
     };
 
@@ -144,15 +156,6 @@ function UploadCad() {
             </form>
         </div>
     );
-
-    async function fetchCategories() {
-        try {
-            const { data } = await GetCategories();
-            setCategories(data);
-        } catch (e) {
-            console.error(e);
-        }
-    };
 }
 
 export default UploadCad;

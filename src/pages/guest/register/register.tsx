@@ -1,13 +1,14 @@
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import { Register } from '@/requests/public/identity';
+import { useRegister } from '@/hooks/requests/identity';
 import ErrorPage from '@/components/error-page';
 import Input from '@/components/fields/input';
 import Password from '@/components/fields/password';
 import capitalize from '@/utils/capitalize';
 import registerValidations from './register-validations';
 import IRegister from '@/interfaces/register';
+import getStatusCode from '@/utils/get-status-code';
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -17,19 +18,22 @@ function RegisterPage() {
     const { register, formState, handleSubmit, watch } = useForm<IRegister>({ mode: 'onTouched' });
     const { firstName, lastName, username, email, password, confirmPassword } = registerValidations(watch('password'));
 
-    const isClient = role!.toLowerCase() === "client";
-    const isContributor = role!.toLowerCase() === "contributor";
+    const isClient = role?.toLowerCase() === "client";
+    const isContributor = role?.toLowerCase() === "contributor";
     if (!(isClient || isContributor)) {
         return <ErrorPage status={404} />;
     }
 
+    const registerMutation = useRegister();
     const onSubmit = async (user: IRegister) => {
-        try {
-            await Register(isClient ? 'Client' : 'Contributor', user);
-            navigate(`/register/verify-email/${user.username}`);
-        } catch (e) {
-            console.log(e);
-        }
+        const dto = { role: isClient ? 'Client' : 'Contributor', user: user };
+        await registerMutation.mutateAsync(dto);
+        navigate(`/register/verify-email/${user.username}`);
+    }
+
+    if (registerMutation.isError) {
+        const status = getStatusCode(registerMutation.error);
+        return <ErrorPage status={status} />;
     }
 
     return (

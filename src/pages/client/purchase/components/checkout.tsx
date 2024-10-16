@@ -2,7 +2,9 @@ import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Purchase } from '@/requests/private/payment';
+import { usePurchase } from '@/hooks/requests/payment';
+import ErrorPage from '@/components/error-page';
+import getStatusCode from '@/utils/get-status-code';
 
 interface CheckoutFormProps {
     id: number
@@ -12,6 +14,7 @@ interface CheckoutFormProps {
 function CheckoutForm({ id, onSubmit }: CheckoutFormProps) {
     const stripe = useStripe();
     const elements = useElements();
+    const purchaseMutation = usePurchase();
     const { t: tPages } = useTranslation('pages');
 
     const [awaitingState, processingState, successState, errorState] = ['awaiting', 'processing', 'success', 'error'];
@@ -56,8 +59,10 @@ function CheckoutForm({ id, onSubmit }: CheckoutFormProps) {
             setError(error.message ?? '');
             return;
         }
-        const { data, status } = await Purchase(id, paymentMethod.id);
-        
+
+        const dto = { id: id, paymentMethodId: paymentMethod.id };
+        const { data, status } = await purchaseMutation.mutateAsync(dto);
+
         if (status === 400) {
             setStatus(errorState);
 
@@ -76,6 +81,10 @@ function CheckoutForm({ id, onSubmit }: CheckoutFormProps) {
         await onSubmit(paymentMethod.id);
         setStatus(successState);
     };
+    if (purchaseMutation.isError) {
+        const status = getStatusCode(purchaseMutation.error);
+        return <ErrorPage status={status} />;
+    }
 
     return (
         <div className="bg-indigo-100 max-w-lg h-full mx-auto py-6 px-10 border-2 border-indigo-700 rounded-lg shadow-lg shadow-indigo-500">
